@@ -78,6 +78,8 @@ body.curve #glass{
 #names .nrow.sel{ color:#0a0a18; }
 #names .nrow.bundle{ color:#ffd23f; }
 #names .nrow.bundle.sel{ color:#0a0a18; }
+/* Japanese mode (the 日本語 toggle): swap the name overlay to the OS kana font */
+#names.jp .ntxt{ font-family:'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP','MS PGothic',sans-serif; }
 
 /* CRT glass: scanlines + shadow-mask tint + vignette + flicker.
    Kept subtle so names stay legible.  Sits above scene+names. */

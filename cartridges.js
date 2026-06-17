@@ -85,3 +85,23 @@ window.VIEWS = {
 /* counts auto-derive from the registry above */
 window.EXTRA.tag = '+' + window.VIEWS.extra.length;
 window.EXTRA.blurb = window.VIEWS.extra.length + ' theory games: ' + window.EXTRA.blurb;
+
+/* Japanese strings (jp = name, jb = blurb), merged in by href. The start-screen
+   日本語 toggle swaps the DOM names to jp and the info blurb to jb; the canvas
+   draws them with the OS kana font (no kana webfont bundled). */
+const JP = {
+  'anymal-mdp/':         {jp:'アニマル MDP',       jb:'ロボット犬がごほうびを求めて格子を歩く。状態・行動・遷移・報酬という、あらゆる意思決定問題の四つの部品を体感しよう。'},
+  'repair-or-replace/':  {jp:'修理か交換か',        jb:'一台のバン、四段階の摩耗。走らせる・整備する・買い替える。まだ動くうちに手放す見極めを、割引率ガンマが決める。'},
+  'last-minute-pricing/':{jp:'直前の値付け',        jb:'売れ残る在庫と深夜の締め切り。毎日値段を決め、収益管理の地形を動的計画法とSARSAで学ぶ。'},
+  'recycling-robot/':    {jp:'リサイクルロボット',  jb:'電池で動く回収ロボット。探す・待つ・充電する。電池が減ったら、立ち往生する前に充電へ。'},
+  'pokemon-battle/':     {jp:'ポケモンバトル',      jb:'野生のヒトカゲがあらわれた！初代の対戦画面で学ぶ、同じ強化学習のレッスン。'},
+  'stale-by-sundown/':   {jp:'日没までに',          jb:'生鮮品は日が暮れると傷む。保つ・値引き・処分する。正しい判断は鮮度の段階を下りていく。'},
+  'critical-spare/':     {jp:'予備部品',            jb:'一台の機械、一つの予備在庫。走らせる・予備を注文・交換する。故障で止まる前に予備を備えよ。'},
+  'casino/':             {jp:'カジノ',              jb:'五台のスロット、隠れた確率。手で回して当たりを学び、イプシロン貪欲法で探索と稼ぎを両立させる。'},
+  'spooky-house/':       {jp:'お化け屋敷',          jb:'幽霊だらけの格子。右か下へ進んで怖さを最大にする。たった一つの再帰が総当たりに勝つ。'},
+  'darts/':              {jp:'暗闇のダーツ',        jb:'見えない的にダーツを投げる。大きく外せば大きく直し、歩幅を縮めて狙いを落ち着かせる。'},
+  'minigolf/':           {jp:'ミニゴルフ',          jb:'隠れたホールへパット。でも風が毎回ずらす。一打は嘘をつくから、ぶれる試行を重ねて力加減を見極めよう。'},
+};
+window.GAMES.forEach(g => { const j = JP[g.href]; if(j){ g.jp = j.jp; g.jb = j.jb; } });
+window.EXTRA.jp = '理論ゲーム';
+window.EXTRA.jb = '核心の考え方を体で掴むための実習ビジュアル。スタートを押して開く。';

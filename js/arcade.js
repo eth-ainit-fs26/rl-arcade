@@ -297,6 +297,30 @@ function textCenter(s, cx, y, col, sc, sp){
   return text(s, Math.round(cx - w/2), y, col, sc, sp);
 }
 
+/* Japanese text: the 5x7 bitmap font is Latin-only, so in JP mode we draw the
+   localized strings with the OS kana font via fillText (offline; no bundled
+   kana webfont). The DOM name overlay uses the same stack via #names.jp. */
+const JPFONT = "'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic','Noto Sans JP','MS PGothic',sans-serif";
+function jtext(s, x, y, col, px, align){
+  px = px || 8;
+  ctx.save();
+  ctx.fillStyle = col; ctx.textBaseline = 'top'; ctx.textAlign = align || 'left';
+  ctx.font = px + "px " + JPFONT;
+  ctx.fillText(s, Math.round(x), Math.round(y));
+  ctx.restore();
+}
+function jwrap(s, maxW, px){          // wrap a (space-less) JP string by measured width
+  ctx.save(); ctx.font = (px||8) + "px " + JPFONT;
+  const out = []; let line = '';
+  for(const ch of s){
+    if(line && ctx.measureText(line + ch).width > maxW){ out.push(line); line = ch; }
+    else line += ch;
+  }
+  if(line) out.push(line);
+  ctx.restore();
+  return out;
+}
+
 /* ===================================================================== *
  *  BLOCKY "CLASSIC RL" LOGO  (color-cycling).  Built from the 5x7 font at
  *  a big scale, but each letter is tinted from LOGO_RAMP with an offset
@@ -353,6 +377,7 @@ const skipIntro = (qs.get('boot') === '0');
 const startSel  = parseInt(qs.get('i'), 10);
 const demoParam = (qs.get('demo') === '1');
 const phaseParam = parseInt(qs.get('phase'), 10);   // QA: force an attract phase
+let jpOn = (qs.get('jp') === '1');                  // 日本語 mode (also via the toggle button)
 if(qs.get('view') === 'extra'){ view = 'extra'; sel = 0; }
 if(!isNaN(startSel)) sel = Math.max(0, Math.min(curList().length - 1, startSel));
 
@@ -385,13 +410,14 @@ function clampScroll(){
    layout()/scroll change so names sit exactly over the canvas rows */
 function buildNames(){
   namesEl.innerHTML = '';
+  namesEl.classList.toggle('jp', jpOn);   // kana font when Japanese is on
   curList().forEach((g, i) => {
     const r = document.createElement('div');
     r.className = 'nrow' + (g.isBundle ? ' bundle' : '');
     r.dataset.i = i;
     const t = document.createElement('span');
     t.className = 'ntxt';
-    t.textContent = g.name;
+    t.textContent = (jpOn && g.jp) ? g.jp : g.name;
     r.appendChild(t);
     // click/tap a row -> select; tap again -> boot (ported behaviour)
     r.addEventListener('click', () => {
@@ -517,6 +543,14 @@ function drawInfo(){
   // accent bar + dark slab
   ctx.fillStyle = acc; ctx.fillRect(x, y, 2, 22);
   dither(x+3, y, w-3, 22, PAL.black, PAL.dark, 2);
+  if(jpOn && g.jb){
+    // Japanese: label + blurb in the OS kana font (drawn, not bitmap)
+    const jlabel = g.isBundle ? ('理論ゲーム ' + VIEWS.extra.length)
+                              : ((sel+1) + '. ' + (g.jp || g.name));
+    jtext(jlabel, x+6, y+1, acc, 8, 'left');
+    jwrap(g.jb, w-10, 8).slice(0,2).forEach((ln,i) => jtext(ln, x+6, y+11 + i*9, PAL.white, 8, 'left'));
+    return;
+  }
   // label line
   const label = g.isBundle ? ('THEORY · ' + VIEWS.extra.length + ' GAMES')
                            : ('NO.' + String(sel+1).padStart(2,'0') + ' · ' + g.name);
@@ -564,15 +598,25 @@ function drawBadge(f){
   ctx.fillStyle = PAL.black;  ctx.fillRect(x+1, y+1, w-2, 9);
   textCenter(txt, VW/2, y+2, PAL.yellow, 1, 1);
   // sub-title line under the badge
-  const sub = (view==='extra') ? '▶ THEORY GAMES'
-                               : 'AI IN INDUSTRY · REINFORCEMENT LEARNING';
-  textCenter(sub, VW/2, y+13, PAL.grey, 1, 1);
+  if(jpOn){
+    const jsub = (view==='extra') ? '▶ 理論ゲーム' : 'AI in Industry · 強化学習';
+    jtext(jsub, VW/2, y+13, PAL.grey, 8, 'center');
+  } else {
+    const sub = (view==='extra') ? '▶ THEORY GAMES'
+                                 : 'AI IN INDUSTRY · REINFORCEMENT LEARNING';
+    textCenter(sub, VW/2, y+13, PAL.grey, 1, 1);
+  }
 }
 function drawPrompts(f){
   const py = VH - 27;          // sits above the raised marquee strip
   // CREDIT line (left), shows DEMO tag in attract
   const credit = 'CREDIT 00' + (attract ? '   DEMO' : '');
   text(credit, FB+3, py, PAL.grey, 1, 1);
+  if(jpOn){
+    if(reduce || ((f>>4)&1)) jtext('コイン投入', VW/2, py, PAL.yellow, 8, 'center');
+    if(reduce || (((f>>4)&1)===0)) jtext('▶ スタート', VW - FB - 3, py, PAL.red, 8, 'right');
+    return;
+  }
   // INSERT COIN (centre) hard-blink
   if(reduce || ((f>>4)&1)){
     textCenter('INSERT COIN', VW/2, py, PAL.yellow, 1, 1);
@@ -864,11 +908,12 @@ function cycleTheme(){ themeIdx = (themeIdx + 1) % THEMES.length; applyTheme(); 
  *  JP toggle : flips the prompt tint (we keep the latin 5x7 font, so this
  *  is a light nod that honours "keep whatever's there" without a kana font).
  * ===================================================================== */
-let jpOn = false;
 function toggleJP(){
   jpOn = !jpOn;
   const btn = document.getElementById('jp-btn');
-  btn.classList.toggle('on', jpOn);
+  if(btn) btn.classList.toggle('on', jpOn);
+  namesEl.classList.toggle('jp', jpOn);   // swap the DOM names to the kana font
+  buildNames();                            // relabel rows (jp <-> en)
   blip();
 }
 
