@@ -466,7 +466,7 @@ function drawList(f){
     }
 
     // row number (EX for the bundle)
-    const no = g.isBundle ? 'EX' : String(i + 1).padStart(2, '0');
+    const no = g.isBundle ? 'TH' : String(i + 1).padStart(2, '0');
     text(no, NUM_X, y + 5, ink, 1, 1);
 
     // sprite chip (small framed icon)
@@ -518,7 +518,7 @@ function drawInfo(){
   ctx.fillStyle = acc; ctx.fillRect(x, y, 2, 22);
   dither(x+3, y, w-3, 22, PAL.black, PAL.dark, 2);
   // label line
-  const label = g.isBundle ? ('EXTRA · ' + VIEWS.extra.length + ' BONUS')
+  const label = g.isBundle ? ('THEORY · ' + VIEWS.extra.length + ' GAMES')
                            : ('NO.' + String(sel+1).padStart(2,'0') + ' · ' + g.name);
   text(label.slice(0, 40), x+6, y+2, acc, 1, 1);
   // blurb (2 lines max, uppercase)
@@ -530,7 +530,7 @@ function drawInfo(){
  *  MARQUEE  (bottom) : looping ticker, stepped 1px/frame.
  * ===================================================================== */
 function marqueeText(){
-  return '© 1986 SML · ETH ZURICH · ' + GAMES.length +
+  return '© 1986 · ETH ZURICH · ' + GAMES.length +
          ' GAMES · INSERT COIN · ↑↓ SELECT · ' +
          (view==='extra' ? 'ESC BACK · ' : '') + 'PUSH START · ';
 }
@@ -556,7 +556,7 @@ function drawMarquee(f){
  *  BADGE + CREDIT/INSERT-COIN + PUSH START prompt (canvas)
  * ===================================================================== */
 function drawBadge(f){
-  const txt = (view==='extra') ? ('EXTRA ' + VIEWS.extra.length)
+  const txt = (view==='extra') ? ('THEORY ' + VIEWS.extra.length)
                                : (GAMES.length + ' IN 1');
   const w = textWidth(txt, 1) + 8;
   const x = Math.round(VW/2 - w/2), y = 54;
@@ -564,8 +564,8 @@ function drawBadge(f){
   ctx.fillStyle = PAL.black;  ctx.fillRect(x+1, y+1, w-2, 9);
   textCenter(txt, VW/2, y+2, PAL.yellow, 1, 1);
   // sub-title line under the badge
-  const sub = (view==='extra') ? '▶ EXTRA GAMES'
-                               : 'SML · REINFORCEMENT LEARNING';
+  const sub = (view==='extra') ? '▶ THEORY GAMES'
+                               : 'REINFORCEMENT LEARNING';
   textCenter(sub, VW/2, y+13, PAL.grey, 1, 1);
 }
 function drawPrompts(f){
@@ -741,7 +741,7 @@ function boot(){
 }
 function openExtra(){
   exitAttract(); coin();
-  showLoading('EXTRA GAMES');
+  showLoading('THEORY GAMES');
   setTimeout(() => {
     view = 'extra'; sel = 0; scroll = 0;
     buildNames(); hideLoading(); resetIdle();

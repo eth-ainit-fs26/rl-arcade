@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>⛳ Mini-Golf in the Wind</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #071a07 0, #000 55%, #020a02 100%);
+            color: #f4f4f5;
+            color-scheme: dark;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Header ===== */
+        .header-row {
+            height: 44px;
+            padding: 4px 16px;
+            background: rgba(10, 20, 10, 0.97);
+            border-bottom: 1px solid rgba(34, 197, 94, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-main {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #86efac;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* ===== Shell ===== */
+        .game-shell {
+            flex: 1;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== Green ===== */
+        .green-container {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+
+        .green-label {
+            font-size: 11px;
+            color: #4b5563;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .green {
+            position: relative;
+            width: 100%;
+            height: 72px;
+            background: linear-gradient(180deg, #14532d 0%, #166534 40%, #14532d 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            overflow: hidden;
+        }
+
+        /* mowing stripes */
+        .green::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px, transparent 48px,
+                rgba(0,0,0,0.12) 48px, rgba(0,0,0,0.12) 96px
+            );
+        }
+
+        .tee-marker {
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            font-weight: 800;
+            color: #fcd34d;
+            letter-spacing: 0.05em;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+            z-index: 4;
+        }
+
+        /* Yellow line showing expected landing (no wind) */
+        .force-line {
+            position: absolute;
+            width: 2px;
+            top: 0;
+            bottom: 0;
+            background: rgba(251,191,36,0.35);
+            transform: translateX(-50%);
+            transition: left 0.1s;
+            z-index: 3;
+        }
+
+        .force-line::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: #fcd34d;
+            white-space: nowrap;
+            opacity: 0.7;
+        }
+
+        /* Ball */
+        .ball {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle at 35% 35%, #ffffff, #d1d5db);
+            border-radius: 50%;
+            top: 50%;
+            left: 0%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.9);
+            transition: left 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 10;
+        }
+
+        /* Hole marker (hidden until revealed) */
+        .hole-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            display: none;
+            z-index: 8;
+            filter: drop-shadow(0 0 6px rgba(34,197,94,0.6));
+        }
+
+        /* Landing history dots */
+        .ldot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #374151;
+            margin-top: 6px;
+            padding: 0 2px;
+        }
+
+        /* ===== Controls ===== */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .force-display {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: ui-monospace, Menlo, monospace;
+            color: #fcd34d;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        button { border: none; cursor: pointer; font-weight: 600; border-radius: 8px; transition: all 0.12s; }
+
+        .btn-adj {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #d1d5db;
+            padding: 9px 16px;
+            font-size: 14px;
+        }
+        .btn-adj:hover { background: rgba(255,255,255,0.12); }
+
+        .btn-putt {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #052e16;
+            padding: 12px 36px;
+            font-size: 1rem;
+            font-weight: 800;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+            letter-spacing: 0.04em;
+        }
+        .btn-putt:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-putt:active { transform: none; }
+        .btn-putt:disabled { opacity: 0.35; cursor: default; transform: none; }
+
+        .btn-sm {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #6b7280;
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        .btn-sm:hover { background: rgba(255,255,255,0.05); color: #9ca3af; }
+        .btn-sm:disabled { opacity: 0.4; cursor: default; }
+
+        .key-hints {
+            text-align: center;
+            font-size: 12px;
+            color: #374151;
+        }
+        kbd {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: ui-monospace, monospace;
+            font-size: 11px;
+        }
+
+        /* ===== Feedback ===== */
+        .feedback {
+            text-align: center;
+            font-size: 1.35rem;
+            font-weight: 700;
+            padding: 18px 20px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.25s, border-color 0.25s, background 0.25s;
+            color: #4b5563;
+        }
+        .feedback.overshot  { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+        .feedback.undershot { color: #60a5fa; border-color: rgba(96,165,250,0.3);  background: rgba(96,165,250,0.05); }
+        .feedback.perfect   { color: #4ade80; border-color: rgba(74,222,128,0.3);  background: rgba(74,222,128,0.05); }
+
+        /* ===== Stats ===== */
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 10px 20px;
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .stat-label { font-size: 10px; color: #4b5563; text-transform: uppercase; letter-spacing: 0.08em; }
+        .stat-value { font-size: 1.3rem; font-weight: 800; font-family: ui-monospace, monospace; margin-top: 2px; color: #e5e7eb; }
+
+        /* ===== History ===== */
+        .history-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 12px 16px;
+            max-height: 170px;
+            overflow-y: auto;
+        }
+
+        .history-label { font-size: 10px; color: #374151; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+
+        .history-list {
+            list-style: none;
+            margin: 0; padding: 0;
+            font-size: 12px;
+            font-family: ui-monospace, Menlo, monospace;
+        }
+
+        .history-list li {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #6b7280;
+        }
+        .history-list li:last-child { border-bottom: none; }
+
+        .tag-past    { color: #f87171; font-weight: 700; }
+        .tag-short   { color: #60a5fa; font-weight: 700; }
+        .tag-perfect { color: #4ade80; font-weight: 700; }
+
+        /* ===== Pop animation ===== */
+        @keyframes pop {
+            0%   { transform: translate(-50%,-50%) scale(1); }
+            40%  { transform: translate(-50%,-50%) scale(1.6); }
+            100% { transform: translate(-50%,-50%) scale(1); }
+        }
+        .ball.pop { animation: pop 0.4s ease-out; }
+    </style>
+</head>
+<body>
+
+<div class="header-row">
+    <div class="header-main">⛳ Mini-Golf in the Wind</div>
+    <div class="header-right">
+        <span id="roundDisplay">Round 0 / 100</span>
+        <button class="btn-sm" id="revealBtn" onclick="revealHole()">Reveal hole</button>
+        <button class="btn-sm" onclick="resetGame()">Reset</button>
+    </div>
+</div>
+
+<div class="game-shell">
+
+    <!-- The Green -->
+    <div class="green-container">
+        <div class="green-label">The Green — distance (m), 0 → 100</div>
+        <div class="green" id="green">
+            <div class="tee-marker">TEE</div>
+            <div class="force-line" id="forceLine" data-label="your force" style="left:50%"></div>
+            <div class="ball" id="ball" style="left:0%"></div>
+            <div class="hole-marker" id="holeMarker">⛳</div>
+        </div>
+        <div class="scale">
+            <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="btn-adj" onclick="adjustForce(-5)" title="−5 force">−5</button>
+        <button class="btn-adj" onclick="adjustForce(-1)" title="−1 force">−1</button>
+        <div class="force-display" id="forceDisplay">50.0</div>
+        <button class="btn-adj" onclick="adjustForce(1)"  title="+1 force">+1</button>
+        <button class="btn-adj" onclick="adjustForce(5)"  title="+5 force">+5</button>
+        <button class="btn-putt" id="puttBtn" onclick="putt()">PUTT 🏌️</button>
+    </div>
+
+    <div class="key-hints">
+        <kbd>F</kbd> <kbd>G</kbd> adjust force &nbsp;·&nbsp; <kbd>Space</kbd> putt
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback" id="feedback">
+        Adjust your force and putt — the hole is hidden somewhere on the green.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Round</div>
+            <div class="stat-value" id="statRound">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Last error</div>
+            <div class="stat-value" id="statLast">—</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg |error|</div>
+            <div class="stat-value" id="statAvg">—</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Best |error|</div>
+            <div class="stat-value" id="statBest">—</div>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-box">
+        <div class="history-label">Shot history (most recent first)</div>
+        <ul class="history-list" id="historyList">
+            <li style="color:#374151;font-style:italic">No shots yet.</li>
+        </ul>
+    </div>
+
+</div><!-- end game-shell -->
+
+<script>
+// ===== Config (URL params or defaults) =====
+const CFG = (() => {
+    const p = new URLSearchParams(window.location.search);
+    return {
+        hole:      parseFloat(p.get('hole')      || '30'),
+        windStd:   parseFloat(p.get('windStd')   || '8.0'),
+        maxRounds: parseInt(  p.get('maxRounds') || '100'),
+        seed:      parseInt(  p.get('seed')      || '1234'),
+    };
+})();
+
+const HOLE_POS  = CFG.hole;
+const WIND_STD  = CFG.windStd;
+const MAX_ROUNDS = CFG.maxRounds;
+
+// ===== Seeded PRNG (mulberry32) =====
+function mulberry32(seed) {
+    return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+let _r;
+
+function gaussianRandom(std) {
+    let u, v;
+    do { u = _r(); } while (u === 0);
+    do { v = _r(); } while (v === 0);
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * std;
+}
+
+// ===== State =====
+let state;
+
+function initState() {
+    _r = mulberry32(CFG.seed);
+    state = {
+        force:         50.0,
+        round:         0,
+        totalAbsError: 0,
+        bestAbsError:  Infinity,
+        holeRevealed:  false,
+    };
+}
+
+// ===== Helpers =====
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// ===== Force control =====
+function adjustForce(delta) {
+    state.force = clamp(state.force + delta, 0, 100);
+    syncForceUI();
+}
+
+function syncForceUI() {
+    document.getElementById('forceDisplay').textContent = state.force.toFixed(1);
+    document.getElementById('forceLine').style.left = state.force + '%';
+    document.getElementById('forceLine').dataset.label = 'force ' + state.force.toFixed(1);
+}
+
+// ===== Putt =====
+function putt() {
+    if (state.round >= MAX_ROUNDS) return;
+
+    const wind    = gaussianRandom(WIND_STD);
+    const landing = clamp(state.force + wind, 0, 100);
+    const err     = landing - HOLE_POS;
+    const absErr  = Math.abs(err);
+
+    state.round++;
+    state.totalAbsError += absErr;
+    state.bestAbsError   = Math.min(state.bestAbsError, absErr);
+
+    // Ball animation
+    const ball = document.getElementById('ball');
+    ball.classList.remove('pop');
+    void ball.offsetWidth; // reflow to restart animation
+    ball.style.left = landing + '%';
+    setTimeout(() => ball.classList.add('pop'), 450);
+
+    // Landing dot
+    addDot(landing, err);
+
+    // UI updates
+    showFeedback(err);
+    updateStats(err);
+    addHistoryItem(state.round, state.force, landing, err);
+
+    document.getElementById('roundDisplay').textContent =
+        `Round ${state.round} / ${MAX_ROUNDS}`;
+
+    if (state.round >= MAX_ROUNDS) {
+        document.getElementById('puttBtn').disabled = true;
+    }
+}
+
+function addDot(landing, err) {
+    const green = document.getElementById('green');
+    // Fade existing dots
+    green.querySelectorAll('.ldot').forEach((d, i) => {
+        d.style.opacity = String(Math.max(0.08, 0.45 - i * 0.06));
+    });
+    const dot = document.createElement('div');
+    dot.className = 'ldot';
+    dot.style.left       = landing + '%';
+    dot.style.background = err > 0 ? '#f87171' : '#60a5fa';
+    dot.style.opacity    = '0.55';
+    green.appendChild(dot);
+}
+
+function showFeedback(err) {
+    const fb  = document.getElementById('feedback');
+    const abs = Math.abs(err).toFixed(1);
+    if (Math.abs(err) < 1.5) {
+        fb.textContent = `🎉 So close! ${err >= 0 ? 'Just past' : 'Just short'} by ${abs} m`;
+        fb.className   = 'feedback perfect';
+    } else if (err > 0) {
+        fb.textContent = `📢  PAST the hole by ${abs} m — try a little less force`;
+        fb.className   = 'feedback overshot';
+    } else {
+        fb.textContent = `📢  SHORT of the hole by ${abs} m — try a little more force`;
+        fb.className   = 'feedback undershot';
+    }
+}
+
+function updateStats(err) {
+    const absErr = Math.abs(err);
+    document.getElementById('statRound').textContent = state.round;
+    document.getElementById('statLast').textContent  =
+        (err >= 0 ? '+' : '') + err.toFixed(1);
+    document.getElementById('statAvg').textContent   =
+        (state.totalAbsError / state.round).toFixed(1);
+    document.getElementById('statBest').textContent  =
+        state.bestAbsError.toFixed(1);
+}
+
+function addHistoryItem(round, force, landing, err) {
+    const list = document.getElementById('historyList');
+    if (round === 1) list.innerHTML = '';
+
+    const abs = Math.abs(err).toFixed(1);
+    let tag;
+    if (Math.abs(err) < 1.5) {
+        tag = `<span class="tag-perfect">≈ HOLE  Δ${abs}</span>`;
+    } else if (err > 0) {
+        tag = `<span class="tag-past">PAST  +${abs}</span>`;
+    } else {
+        tag = `<span class="tag-short">SHORT −${abs}</span>`;
+    }
+
+    const li = document.createElement('li');
+    li.innerHTML =
+        `#${round}: force ${force.toFixed(1)} → landed ${landing.toFixed(1)} → ${tag}`;
+    list.prepend(li);
+}
+
+// ===== Reveal / Reset =====
+function revealHole() {
+    state.holeRevealed = true;
+    const m = document.getElementById('holeMarker');
+    m.style.display = 'block';
+    m.style.left    = HOLE_POS + '%';
+    const btn = document.getElementById('revealBtn');
+    btn.textContent = `Hole @ ${HOLE_POS.toFixed(1)}`;
+    btn.disabled    = true;
+}
+
+function resetGame() {
+    // clear dots
+    document.querySelectorAll('.ldot').forEach(d => d.remove());
+    // hide hole
+    document.getElementById('holeMarker').style.display = 'none';
+    document.getElementById('revealBtn').textContent = 'Reveal hole';
+    document.getElementById('revealBtn').disabled    = false;
+    // reset ball
+    const ball = document.getElementById('ball');
+    ball.classList.remove('pop');
+    ball.style.left = '0%';
+    // reset stats display
+    ['statRound','statLast','statAvg','statBest'].forEach(id => {
+        document.getElementById(id).textContent = id === 'statRound' ? '0' : '—';
+    });
+    document.getElementById('roundDisplay').textContent = `Round 0 / ${MAX_ROUNDS}`;
+    document.getElementById('historyList').innerHTML =
+        '<li style="color:#374151;font-style:italic">No shots yet.</li>';
+    document.getElementById('feedback').textContent =
+        'Adjust your force and putt — the hole is hidden somewhere on the green.';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('puttBtn').disabled = false;
+    initState();
+    syncForceUI();
+}
+
+// ===== Keyboard =====
+// Keys only active while the mouse is over the game widget.
+let _gameHovered = false;
+document.querySelector('.game-shell').addEventListener('mouseenter', () => _gameHovered = true);
+document.querySelector('.game-shell').addEventListener('mouseleave', () => _gameHovered = false);
+
+document.addEventListener('keydown', e => {
+    if (!_gameHovered) return;
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); adjustForce(-1); }
+    if (e.key === 'g' || e.key === 'G') { e.preventDefault(); adjustForce(1);  }
+    if (e.key === ' ')                  { e.preventDefault(); putt();           }
+});
+
+// ===== Boot =====
+initState();
+syncForceUI();
+</script>
+
+</body>
+</html>
