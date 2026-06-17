@@ -1834,7 +1834,7 @@ body.slide-mode .stage  { padding: 12px 18px; }
 /* ============================================================
    Boot-up animation — Game Boy-style "Nintendo" splash
    ----------------------------------------------------------------
-   Drops "SML" from the top, lingers, fades out.  ~1.5 s total.
+   Drops "AI in Industry" from the top, lingers, fades out.  ~1.5 s total.
    Fires once per browser session (sessionStorage flag).
    ============================================================ */
 .boot-overlay {

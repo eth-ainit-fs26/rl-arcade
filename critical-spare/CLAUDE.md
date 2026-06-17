@@ -2,7 +2,7 @@
 
 A browser-only, no-build, file://-safe educational visualization of the
 **Critical Spare** machine-maintenance MDP for a **manager audience**. It is one
-cartridge in the SML reinforcement-learning gallery (a sibling of
+cartridge in the AI in Industry reinforcement-learning gallery (a sibling of
 `gamblers-ruin/`, `press-your-luck/`, `pokemon-battle/`, ...). It walks the
 canonical **13-scene arc** (title -> tutorial -> playtest -> formalization ->
 policy -> trajectory -> return -> Q* -> Bellman -> DP -> DP-caveat -> SARSA ->

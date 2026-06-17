@@ -57,7 +57,7 @@
         '<span class="sc0-start-label">' + (T('title.start') || 'PRESS START').replace(/^▶\s*/, '') + '</span>' +
       '</button>' +
       '<div class="sc0-grass-strip"></div>' +
-      '<div class="sc0-credits">' + (T('title.credits') || 'SML · ETH ZURICH · CLASSIC RL #7') + '</div>' +
+      '<div class="sc0-credits">' + (T('title.credits') || 'AI in Industry · ETH ZURICH · CLASSIC RL #7') + '</div>' +
       '<div class="sc0-credits sc0-credits-by">' + (T('title.by') || 'BY CARLOS COTRINI') + '</div>';
     root.appendChild(titleWrap);
 

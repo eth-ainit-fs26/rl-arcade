@@ -26,7 +26,7 @@
       'scene12.text.sarsa':  'No posted odds? Learn the playbook by playing: trial, outcome, adjust. It converges to the same answer.',
       'scene12.revisit':     'revisit scene {n}',
       'scene12.close':       'The croissant was tiny on purpose. The same six ideas price airline seats, hotel rooms, ad budgets, and end-of-season racks: anything that goes stale by sundown. You now have the bones of how machines (and good operators) optimize decisions under uncertainty.',
-      'scene12.by':          'STALE BY SUNDOWN · SML · BY CARLOS COTRINI',
+      'scene12.by':          'STALE BY SUNDOWN · AI in Industry · BY CARLOS COTRINI',
     },
     jp: {
       'scene12.title':  'まとめ',
@@ -51,7 +51,7 @@
       'scene12.text.sarsa':  'こうかいオッズなし？ プレイして まなぶ：ためし、 けっか、 ちょうせい。 おなじ こたえに しゅうそく。',
       'scene12.revisit':     'シーン {n} へ',
       'scene12.close':       'クロワッサンが ちいさいのは わざと。 おなじ 6つの アイデアが ひこうきの ざせき、 ホテルの へや、 こうこくよさん、 シーズンおわりの たな の ねだんを きめる：サンダウンまでに いたむ すべての もの。 あなたは いま、 きかい（と すぐれた うんえいしゃ）が ふかくじつせいの もとで けっていを さいてきかする ほねを てに いれた。',
-      'scene12.by':          'ステイル バイ サンダウン · SML · BY CARLOS COTRINI',
+      'scene12.by':          'ステイル バイ サンダウン · AI in Industry · BY CARLOS COTRINI',
     },
   });
 })();

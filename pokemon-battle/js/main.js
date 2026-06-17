@@ -483,7 +483,7 @@
       overlay.className = 'boot-overlay';
       overlay.innerHTML =
         '<div class="boot-stack">' +
-          '<div class="boot-logo">SML</div>' +
+          '<div class="boot-logo">AI in Industry</div>' +
           '<div class="boot-tag">' + T('boot.tag') + '</div>' +
         '</div>';
       document.body.appendChild(overlay);

@@ -2,7 +2,7 @@
 
 A browser-only, no-build, file://-safe educational visualization of the
 **bakery markdown** MDP (a depreciating-asset / revenue-management problem) for a
-**manager audience**. It is one cartridge in the SML reinforcement-learning
+**manager audience**. It is one cartridge in the AI in Industry reinforcement-learning
 gallery (a sibling of `gamblers-ruin/`, `press-your-luck/`,
 `last-minute-pricing/`, `pokemon-battle/`, ...). It walks the canonical
 **13-scene arc** (title -> tutorial -> playtest -> formalization -> policy ->

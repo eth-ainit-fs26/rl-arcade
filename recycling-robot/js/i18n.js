@@ -26,7 +26,7 @@
   const STORE = {
     en: {
       /*, topbar / chrome, */
-      'brand':        'SML · RECYCLING ROBOT',
+      'brand':        'AI in Industry · RECYCLING ROBOT',
       'topbar.prev':  'PREV',
       'topbar.next':  'NEXT',
       'topbar.theme': 'theme',
@@ -103,7 +103,7 @@
 
     jp: {
       /*, topbar / chrome, */
-      'brand':        'SML · リサイクルロボット',
+      'brand':        'AI in Industry · リサイクルロボット',
       'topbar.prev':  'まえ',
       'topbar.next':  'つぎ',
       'topbar.theme': 'いろ',

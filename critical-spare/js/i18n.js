@@ -25,7 +25,7 @@
   const STORE = {
     en: {
       /*, topbar / chrome, */
-      'brand':        'SML · CRITICAL SPARE',
+      'brand':        'AI in Industry · CRITICAL SPARE',
       'topbar.prev':  'PREV',
       'topbar.next':  'NEXT',
       'topbar.theme': 'theme',
@@ -99,7 +99,7 @@
 
     jp: {
       /*, topbar / chrome, */
-      'brand':        'SML · クリティカル スペア',
+      'brand':        'AI in Industry · クリティカル スペア',
       'topbar.prev':  'まえ',
       'topbar.next':  'つぎ',
       'topbar.theme': 'いろ',

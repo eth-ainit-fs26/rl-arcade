@@ -378,7 +378,7 @@ body.lang-jp .scene { letter-spacing: 0.02em; }
 .speaker-notes-content em { color: var(--cb-blue); font-style: normal; }
 
 /* ============================================================
-   Boot-up splash -- "SML" drop, once per session
+   Boot-up splash -- "AI in Industry" drop, once per session
    ============================================================ */
 .boot-overlay {
   position: fixed; inset: 0; z-index: 99999; background: var(--bg);

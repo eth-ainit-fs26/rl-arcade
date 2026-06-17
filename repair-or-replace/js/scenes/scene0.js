@@ -73,7 +73,7 @@
         '<span class="sc0-chevron">&#9654;</span>' +
         '<span class="sc0-start-label">PRESS START</span>' +
       '</button>' +
-      '<div class="sc0-credits">SML &middot; ETH ZURICH &middot; CLASSIC RL</div>' +
+      '<div class="sc0-credits">AI in Industry &middot; ETH ZURICH &middot; CLASSIC RL</div>' +
       '<div class="sc0-credits sc0-credits-by">BY CARLOS COTRINI</div>';
     root.appendChild(wrap);
 

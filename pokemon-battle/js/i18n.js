@@ -28,7 +28,7 @@
   const STRINGS = {
     en: {
       /*, topbar, */
-      'brand':            'SML · POKEMON',
+      'brand':            'AI in Industry · POKEMON',
       'music.on':         '♪ MUSIC ON',
       'music.off':        '♪ MUSIC OFF',
       'lang.toggle':      '日本語',          /* what to switch TO */
@@ -53,7 +53,7 @@
       'title.pokemon':    'POKEMON',
       'title.subtitle':   'A REINFORCEMENT LEARNING ADVENTURE',
       'title.start':      '▶ PRESS START',
-      'title.credits':    'SML · ETH ZURICH · CLASSIC RL #7',
+      'title.credits':    'AI in Industry · ETH ZURICH · CLASSIC RL #7',
       'title.by':         'BY CARLOS COTRINI',
 
       /*, Pokemon display names, */
@@ -613,7 +613,7 @@
 
     jp: {
       /*, topbar, */
-      'brand':            'SML · ポケモン',
+      'brand':            'AI in Industry · ポケモン',
       'music.on':         '♪ おんがく オン',
       'music.off':        '♪ おんがく オフ',
       'lang.toggle':      'ENGLISH',
@@ -636,7 +636,7 @@
       'title.pokemon':    'ポケモン',
       'title.subtitle':   '〜 きょうかがくしゅう ぼうけん 〜',
       'title.start':      '▶ スタート',
-      'title.credits':    'SML · ETH チューリッヒ · CLASSIC RL #7',
+      'title.credits':    'AI in Industry · ETH チューリッヒ · CLASSIC RL #7',
       'title.by':         'カルロス コトリーニ',
 
       'pokemon.pikachu':    'ピカチュウ',

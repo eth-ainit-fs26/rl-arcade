@@ -530,7 +530,7 @@ function drawInfo(){
  *  MARQUEE  (bottom) : looping ticker, stepped 1px/frame.
  * ===================================================================== */
 function marqueeText(){
-  return '© 1986 · ETH ZURICH · ' + GAMES.length +
+  return '© 1986 AI IN INDUSTRY · ETH ZURICH · ' + GAMES.length +
          ' GAMES · INSERT COIN · ↑↓ SELECT · ' +
          (view==='extra' ? 'ESC BACK · ' : '') + 'PUSH START · ';
 }
@@ -565,7 +565,7 @@ function drawBadge(f){
   textCenter(txt, VW/2, y+2, PAL.yellow, 1, 1);
   // sub-title line under the badge
   const sub = (view==='extra') ? '▶ THEORY GAMES'
-                               : 'REINFORCEMENT LEARNING';
+                               : 'AI IN INDUSTRY · REINFORCEMENT LEARNING';
   textCenter(sub, VW/2, y+13, PAL.grey, 1, 1);
 }
 function drawPrompts(f){
@@ -613,7 +613,7 @@ function drawHiScore(){
     const sw = textWidth(r[2],1);
     text(r[2], 248 - sw, y, PAL.white, 1, 1);
   });
-  textCenter('CREATED BY SML · ETH ZURICH', VW/2, 196, PAL.grey, 1, 1);
+  textCenter('CREATED BY AI IN INDUSTRY · ETH ZURICH', VW/2, 196, PAL.grey, 1, 1);
 }
 function drawDemo(f){
   textCenter('DEMO', VW/2, 66, PAL.red, 2, 1);
@@ -683,7 +683,7 @@ function drawScene(f){
     if(attractPhase === 0){
       drawBadge(f);
       textCenter('PUSH START', VW/2, 150, ((f>>3)&1)?PAL.yellow:PAL.black, 2, 1);
-      textCenter('SML REINFORCEMENT LEARNING ARCADE', VW/2, 200, PAL.grey, 1, 1);
+      textCenter('AI IN INDUSTRY REINFORCEMENT LEARNING ARCADE', VW/2, 200, PAL.grey, 1, 1);
     }
     else if(attractPhase === 1){ drawHiScore(); }
     else if(attractPhase === 2){ drawDemo(f); }

@@ -1,6 +1,6 @@
 /* Critical Spare -- global styles.
  *
- * House style: the SML reinforcement-learning gallery's LIGHT PIXEL theme
+ * House style: the AI in Industry reinforcement-learning gallery's LIGHT PIXEL theme
  * (warm grey-cream NES "shell", hard black borders, Press Start 2P
  * everywhere), matching the sibling cartridges gamblers-ruin/ and
  * press-your-luck/ EXACTLY. A screen-only high-contrast CRT variant (amber
@@ -486,7 +486,7 @@ h1, h2, h3 { font-family: 'Press Start 2P', monospace; font-weight: 400; }
    DotGothic16 (a bitmap-style Japanese font from Google Fonts) so the kana
    glyphs match the chiptune pixel-art feel of the English Press-Start-2P
    text. Press Start 2P stays a fallback for Latin glyphs nested inside
-   Japanese strings (e.g. "Q*", "SML"). DotGothic16 is also a tail fallback
+   Japanese strings (e.g. "Q*", "AI in Industry"). DotGothic16 is also a tail fallback
    in EN mode so the language toggle label renders cleanly.
    ============================================================ */
 body.lang-jp,

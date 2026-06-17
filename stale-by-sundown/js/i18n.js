@@ -20,7 +20,7 @@
   const STORE = {
     en: {
       /*, topbar / chrome, */
-      'brand':        'SML · STALE BY SUNDOWN',
+      'brand':        'AI in Industry · STALE BY SUNDOWN',
       'topbar.prev':  'PREV',
       'topbar.next':  'NEXT',
       'topbar.theme': 'theme',
@@ -98,7 +98,7 @@
 
     jp: {
       /*, topbar / chrome, */
-      'brand':        'SML · ステイル バイ サンダウン',
+      'brand':        'AI in Industry · ステイル バイ サンダウン',
       'topbar.prev':  'まえ',
       'topbar.next':  'つぎ',
       'topbar.theme': 'いろ',

@@ -40,7 +40,7 @@
   register({
     en: {
       /* topbar / chrome */
-      'brand':        'SML · PRICING',
+      'brand':        'AI in Industry · PRICING',
       'topbar.prev':  'PREV',
       'topbar.next':  'NEXT',
       'topbar.theme': 'theme',
@@ -103,7 +103,7 @@
       'tt.rare':  'rare',
     },
     jp: {
-      'brand':        'SML · プライシング',
+      'brand':        'AI in Industry · プライシング',
       'topbar.prev':  'まえ',
       'topbar.next':  'つぎ',
       'topbar.theme': 'いろ',
