@@ -1,0 +1,20 @@
+node_modules/
+.shots_tmp/
+.DS_Store
+*.pma
+BrowserMetrics*
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+
+# QA / scratch
+qa-shots/
+reports/
+test-results/
+playwright-report/

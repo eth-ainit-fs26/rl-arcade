@@ -1,0 +1,198 @@
+/* ============================================================
+   Scene 7, "Q*: the action scorecard".
+   Concrete first, formula last. A md VanCard beside the shared
+   4x3 QTable; rows reveal HEALTHY down to FAILING with the cells
+   staggering in left to right; step 3 pops the +23.5 badge as its
+   own delayed beat; step 5 paints the vertical band strip; step 6
+   reveals the formal Q* card at the bottom. Shared chrome
+   (concept-heading / concept-formula-* / qtable q-*) lives in
+   css/style.css and css/qtable.css. All colour from CSS tokens.
+   ============================================================ */
+
+/* ---- Panel: van icon | scorecard + bands ---- */
+.scene7-scene .s7-panel {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 4px 0 0;
+}
+
+.scene7-scene .s7-icon-col {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: 4px 4px 0 var(--rule);
+  max-width: 250px;
+}
+.scene7-scene .s7-icon-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+/* the SHAKY badge (step 3): +23.5 over the shop, its own beat */
+.scene7-scene .s7-callout {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.8;
+  text-align: center;
+  border: 3px solid var(--lever-replace);
+  background: var(--lever-replace-soft);
+  color: var(--ink-on-box);
+  padding: 7px 9px;
+}
+.scene7-scene .s7-callout b { color: var(--lever-replace); font-size: 11px; }
+.scene7-scene .s7-callout.s7-callout-pop {
+  animation: s7-pop 380ms cubic-bezier(0.2, 1.6, 0.4, 1) 850ms backwards;
+}
+
+.scene7-scene .s7-table-col {
+  flex: 1 1 380px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.scene7-scene .s7-table-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+.scene7-scene .s7-gamma-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid var(--rule);
+  background: var(--bg-strong);
+  padding: 2px 8px;
+  box-shadow: 2px 2px 0 var(--rule);
+}
+.scene7-scene .s7-gamma-chip { text-transform: none; }
+.scene7-scene .s7-gamma-chip .katex { font-size: 11px; color: var(--ink-on-box); }
+.scene7-scene .s7-table-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.scene7-scene .s7-q { min-width: 0; overflow-x: auto; }
+
+/* ---- Reveal states layered on the shared QTable cells ---- */
+.scene7-scene .q-cell.s7-pending,
+.scene7-scene .q-row-head.s7-pending { opacity: 0.3; }
+
+/* a freshly revealed row: label first, then cells left to right */
+.scene7-scene .q-cell.s7-reveal,
+.scene7-scene .q-row-head.s7-reveal {
+  animation: s7-rise 340ms ease-out backwards;
+}
+@keyframes s7-rise {
+  0%   { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes s7-pop {
+  0%   { opacity: 0; transform: scale(0.82); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ---- The vertical band strip (step 5) ---- */
+.scene7-scene .s7-bands {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 0 0 auto;
+}
+.scene7-scene .s7-bands-spacer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  padding-bottom: 4px;
+  height: 32px;
+}
+.scene7-scene .s7-band-cell {
+  width: 60px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--rule);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  font-weight: bold;
+}
+.scene7-scene .s7-band-cell.s7-band-pop {
+  animation: s7-pop 360ms ease-out backwards;
+}
+.scene7-scene .s7-band-cell.lever-run     { background: var(--lever-run-soft);     color: var(--lever-run); }
+.scene7-scene .s7-band-cell.lever-service { background: var(--lever-service-soft); color: var(--lever-service); }
+.scene7-scene .s7-band-cell.lever-replace { background: var(--lever-replace-soft); color: var(--lever-replace); }
+
+/* ---- The formal Q* card (step 6), below the panel ---- */
+.scene7-scene .s7-formula { margin: 16px 0 0; }
+.scene7-scene .s7-formula.s7-pop-in { animation: s7-pop 340ms ease-out backwards; }
+
+/* ---- Caption under the panel: one short line per step ---- */
+.scene7-scene .s7-read {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.9;
+  color: var(--ink-secondary);
+  max-width: 88ch;
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--pikachu-yellow);
+  background: var(--bg-strong);
+}
+.scene7-scene .s7-read b { color: var(--ink-on-box); }
+
+/* ---- Step counter + FILL ALL ---- */
+.scene7-scene .s7-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin: 12px 0 0;
+}
+.scene7-scene .s7-fill { font-size: 8px; padding: 6px 10px; }
+
+/* ---- Motion off: instant mode / reduced motion ---- */
+.scene7-scene.s7-instant .q-cell.s7-reveal,
+.scene7-scene.s7-instant .q-row-head.s7-reveal,
+.scene7-scene.s7-instant .s7-callout.s7-callout-pop,
+.scene7-scene.s7-instant .s7-band-cell.s7-band-pop,
+.scene7-scene.s7-instant .s7-formula.s7-pop-in { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .scene7-scene .q-cell.s7-reveal,
+  .scene7-scene .q-row-head.s7-reveal,
+  .scene7-scene .s7-callout.s7-callout-pop,
+  .scene7-scene .s7-band-cell.s7-band-pop,
+  .scene7-scene .s7-formula.s7-pop-in { animation: none; }
+}
+
+@media (max-width: 720px) {
+  .scene7-scene .s7-panel { gap: 14px; }
+  .scene7-scene .s7-icon-col { max-width: none; flex: 1 1 100%; }
+}
+
+/* Utility hide, last so the doubled class beats every display-setting
+   rule above regardless of source order. */
+.scene7-scene .s7-hidden.s7-hidden { display: none; }

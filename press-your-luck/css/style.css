@@ -1,0 +1,1686 @@
+/* Pokemon battle — viz #7 of the SML reinforcement-learning curriculum.
+   Second integrative review.  Same lesson as Snakes & Ladders, retold on a
+   Gen-1 Pokemon Red/Blue battle screen.  The editorial cream/serif palette of
+   the rest of the curriculum is deliberately overridden here per the user's
+   request; the SKILL §10 anticipates this exit.  The cross-viz hue identities
+   (anymal-red, casino-blue, ghost-purple, star-amber, door-green) are kept as
+   per-component accent tokens so the scene-5 recap can still cite them. */
+
+/* ---------- Press Start 2P ---------- */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../assets/fonts/PressStart2P-Regular.woff2') format('woff2');
+  font-display: block;  /* pixel font: do NOT flash fallback serif first */
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ---------- Tokens ---------- */
+:root,
+:root[data-theme="light"] {
+  /* Page chrome */
+  --bg:             #E8E0CC;     /* warm grey-cream, NES "shell" */
+  --bg-strong:      #F8F4E4;     /* lighter, for dialog boxes */
+  --ink:            #181818;
+  --ink-secondary:  #585858;
+  --rule:           #181818;     /* hard black for Pokemon borders */
+  --card-bg:        #FFFFFF;
+  --inner-highlight:#404040;     /* the secondary inner border line */
+  --pikachu-yellow: #F8D028;
+  --pikachu-cheek:  #E84828;
+  --charmander-orange:#F58030;
+  --hp-green:       #48C848;
+  --hp-yellow:      #E8C828;
+  --hp-red:         #E84828;
+  --damage-text:    #F8F8F8;
+  --damage-stroke:  #181818;
+  --ink-on-box:     #181818;     /* ink on Pokemon-white boxes (always dark) */
+
+  /* Colour-blind-safe semantic palette (Okabe-Ito). Use these — not the
+     hp-green / hp-red brand tokens — wherever colour carries meaning
+     (heatmap, win/lose, positive/negative delta). Pair with a label or
+     icon for redundancy. See teaching-viz SKILL §Colour-blind safety. */
+  --cb-blue:             #0072B2;
+  --cb-blue-light:       #B6D9EB;
+  --cb-vermillion:       #D55E00;
+  --cb-vermillion-light: #F4D2B0;
+  --cb-bluish-green:     #009E73;
+  --cb-yellow:           #F0E442;
+  --cb-orange:           #E69F00;
+  --cb-sky:              #56B4E9;
+  --cb-purple:           #CC79A7;
+
+  /* Cross-viz hue identities (kept for scene-5 recap chips) */
+  --hue-anymal:  #B8323A;     /* red — MDP */
+  --hue-casino:  #2F6CB1;     /* blue — ε-greedy */
+  --hue-ghost:   #7A5C8C;     /* purple — Bellman */
+  --hue-star:    #C08A3E;     /* amber — Robbins-Monro */
+  --hue-door:    #4A8B6B;     /* green — SARSA */
+  --hue-snakes:  #C8902C;     /* gold — Snakes & Ladders sibling */
+
+  /* ===== Press Your Luck lever + state-icon tokens (light) ===== */
+  /* ROLL = the "push" lever (burnt orange / vermillion). */
+  --c-roll:        #C2541E;
+  --c-roll-soft:   #F2C9A8;
+  --c-roll-ink:    #FFFFFF;
+  /* HOLD = the "bank it" lever (deep blue / teal). */
+  --c-hold:        #235E8A;
+  --c-hold-soft:   #B6D2E4;
+  --c-hold-ink:    #FFFFFF;
+  /* Pot-meter chips (glow climbing into a danger band past 20). */
+  --chip-on:       #E8A030;
+  --chip-on-hi:    #FFD070;
+  --chip-off:      #D8CFB6;
+  --chip-danger:   #D6432A;
+  --chip-danger-hi:#FF7A52;
+  /* Standing badge tints. */
+  --stand-behind:  #2F6CB1;
+  --stand-even:    #8A8A7A;
+  --stand-ahead:   #2E9E6B;
+  --stand-track:   #D8CFB6;
+}
+
+:root[data-theme="crt"] {
+  /* Amber-phosphor CRT terminal — dark background, warm-amber text.
+     Distinct from the GB green theme.  Pairs with the scanlines +
+     vignette + phosphor-glow rules at the bottom of this file. */
+  --bg:             #0a0500;
+  --bg-strong:      #1a0d05;
+  --ink:            #FFB350;     /* amber phosphor on the page chrome */
+  --ink-on-box:     #FFB350;
+  --ink-secondary:  #8B6030;
+  --rule:           #FF9020;
+  --card-bg:        #1a0d05;
+  --inner-highlight:#5A3010;
+  --pikachu-yellow: #FFC060;
+  --pikachu-cheek:  #FF6020;
+  --charmander-orange:#FF8030;
+  --hp-green:       #FFB350;
+  --hp-yellow:      #FFB350;
+  --hp-red:         #FF6020;
+  --damage-text:    #FFB350;
+  --damage-stroke:  #0a0500;
+
+  --hue-anymal:  #FF6020;
+  --hue-casino:  #FFB350;
+  --hue-ghost:   #FF9050;
+  --hue-star:    #FFC060;
+  --hue-door:    #FF9020;
+  --hue-snakes:  #FFA040;
+
+  --cb-blue:             #FFB350;
+  --cb-blue-light:       #5A3010;
+  --cb-vermillion:       #FF6020;
+  --cb-vermillion-light: #5A3010;
+  --cb-bluish-green:     #FFB350;
+  --cb-yellow:           #FFC060;
+  --cb-orange:           #FF8030;
+  --cb-sky:              #FFB350;
+  --cb-purple:           #FF9050;
+
+  /* ===== Press Your Luck lever + state-icon tokens (CRT retint) ===== */
+  /* Both levers retint into the amber/orange phosphor palette but stay
+     distinguishable: ROLL hotter orange, HOLD cooler amber. */
+  --c-roll:        #FF6A1E;
+  --c-roll-soft:   #5A3010;
+  --c-roll-ink:    #1a0d05;
+  --c-hold:        #FFC76E;
+  --c-hold-soft:   #3A2008;
+  --c-hold-ink:    #1a0d05;
+  --chip-on:       #FFA838;
+  --chip-on-hi:    #FFD070;
+  --chip-off:      #3A2008;
+  --chip-danger:   #FF5028;
+  --chip-danger-hi:#FF8A52;
+  --stand-behind:  #FFB350;
+  --stand-even:    #8B6030;
+  --stand-ahead:   #FFC878;
+  --stand-track:   #3A2008;
+}
+
+/* CRT scanlines + vignette overlays — only active under the CRT
+   theme.  Pointer-events: none on both so clicks pass through.  */
+:root[data-theme="crt"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9991;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.0) 0px,
+    rgba(0, 0, 0, 0.0) 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  mix-blend-mode: multiply;
+}
+:root[data-theme="crt"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9992;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+/* Phosphor glow on text in the CRT theme. */
+:root[data-theme="crt"] body,
+:root[data-theme="crt"] .scene-title,
+:root[data-theme="crt"] .topbar,
+:root[data-theme="crt"] .poke-section-title,
+:root[data-theme="crt"] .concept-heading {
+  text-shadow: 0 0 6px rgba(255, 180, 80, 0.55);
+}
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Press Start 2P', "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  -webkit-font-smoothing: none;  /* keep pixel font crisp */
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Topbar ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg);
+  border-bottom: 4px solid var(--rule);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.topbar .brand {
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink);
+  font-size: 9px;
+}
+.topbar .scene-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-secondary);
+  flex: 1 1 auto;
+  text-align: center;
+  padding: 0 20px;
+}
+.topbar .right-cluster { display: flex; gap: 6px; align-items: center; }
+
+.theme-toggle, .pager-btn {
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg-strong);
+  color: var(--ink-on-box);
+  border: 2px solid var(--rule);
+  border-radius: 0;
+  padding: 5px 8px;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset -2px -2px 0 0 #BBB6A2;
+}
+.theme-toggle:hover, .pager-btn:hover {
+  background: var(--pikachu-yellow);
+}
+.pager-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* MUSIC button — same chrome as THEME but with an "on" state. */
+.music-toggle.active {
+  background: var(--pikachu-yellow);
+  color: var(--ink);
+  box-shadow: inset 2px 2px 0 0 #B89020;
+}
+
+.dot-pager { display: flex; gap: 4px; align-items: center; }
+.dot-pager .dot {
+  width: 10px; height: 10px;
+  background: var(--ink-secondary);
+  border: 2px solid var(--rule);
+  padding: 0;
+  cursor: pointer;
+}
+.dot-pager .dot.active { background: var(--pikachu-yellow); }
+.dot-pager .dot:hover { background: var(--pikachu-cheek); }
+
+/* ---------- Stage / scene engine ---------- */
+.stage {
+  position: relative;
+  max-width: 1100px;
+  margin: 16px auto 32px;
+  padding: 0 20px;
+  min-height: calc(100vh - 130px);
+}
+.scene {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  transition: opacity 180ms ease-out;
+}
+.scene.active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+  left: 0;
+  right: 0;
+}
+
+/* ---------- Pokemon dialog box ----------
+   The iconic look: thick black outer border + thin inner-highlight rectangle.
+   We render the inner highlight with stacked inset box-shadows. */
+.poke-box {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  padding: 14px 16px;
+  border-radius: 0;
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong);
+  color: var(--ink-on-box);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  position: relative;
+}
+.poke-box.tight { padding: 10px 12px; font-size: 10px; }
+
+.poke-box .triangle {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--ink);
+  animation: blink 0.9s steps(2, end) infinite;
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---------- Headings ---------- */
+.poke-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 38px;
+  color: var(--pikachu-yellow);
+  text-shadow:
+    2px 0 0 var(--ink),
+    -2px 0 0 var(--ink),
+    0 2px 0 var(--ink),
+    0 -2px 0 var(--ink),
+    2px 2px 0 var(--ink),
+    -2px -2px 0 var(--ink),
+    -2px 2px 0 var(--ink),
+    2px -2px 0 var(--ink),
+    4px 4px 0 var(--charmander-orange);
+  margin: 0 0 18px;
+  letter-spacing: 6px;
+}
+.poke-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.poke-section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.poke-caption {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.7;
+  color: var(--ink-secondary);
+  margin: 8px 4px 0;
+  max-width: 76ch;
+}
+
+/* ---------- Pokemon-styled "menu option" rows (for sliders / params) ---------- */
+.poke-menu-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--ink);
+}
+.poke-menu-row::before {
+  content: '\25B6';
+  color: var(--pikachu-yellow);
+  -webkit-text-stroke: 0.5px var(--ink);
+  margin-right: 4px;
+}
+.poke-menu-row input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 140px;
+  height: 8px;
+  background: var(--bg-strong);
+  border: 2px solid var(--rule);
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.poke-menu-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 16px;
+  background: var(--pikachu-yellow);
+  border: 2px solid var(--rule);
+  margin-top: 0;
+  cursor: pointer;
+}
+.poke-menu-row input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 16px;
+  background: var(--pikachu-yellow);
+  border: 2px solid var(--rule);
+  cursor: pointer;
+}
+.poke-menu-row output, .poke-menu-row .val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  min-width: 56px;
+  color: var(--ink);
+}
+.poke-menu-row button {
+  font-family: 'Press Start 2P', monospace;
+  background: var(--bg-strong);
+  border: 2px solid var(--rule);
+  padding: 4px 8px;
+  font-size: 9px;
+  color: var(--ink-on-box);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset -2px -2px 0 0 #BBB6A2;
+}
+.poke-menu-row button:hover { background: var(--pikachu-yellow); }
+.poke-menu-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- KaTeX wrapper ---------- */
+.poke-formula {
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  padding: 10px 14px;
+  margin: 10px auto;
+  display: inline-block;
+  font-family: "KaTeX_Main", "Iowan Old Style", Georgia, serif;
+  box-shadow: inset 0 0 0 2px var(--bg-strong), inset 0 0 0 4px var(--inner-highlight);
+}
+.poke-formula .katex { color: var(--ink-on-box); font-size: 16px; }
+
+/* ---------- Scenes layout helpers ---------- */
+.scene-pad {
+  padding: 12px 4px 24px;
+}
+.scene-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.scene-row.center { justify-content: center; }
+.scene-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+/* ---------- Cross-viz hue chip ---------- */
+.hue-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 2px solid var(--rule);
+  background: var(--bg-strong);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.hue-chip.hue-anymal { background: var(--hue-anymal); color: #fff; }
+.hue-chip.hue-casino { background: var(--hue-casino); color: #fff; }
+.hue-chip.hue-ghost  { background: var(--hue-ghost);  color: #fff; }
+.hue-chip.hue-star   { background: var(--hue-star);   color: #181818; }
+.hue-chip.hue-door   { background: var(--hue-door);   color: #fff; }
+.hue-chip.hue-snakes { background: var(--hue-snakes); color: #181818; }
+.hue-chip.hue-poke   { background: var(--pikachu-yellow); color: #181818; }
+
+/* ---------- N×N state grid for VI / γ scenes (NB = 5 for buckets) ----------
+   Rows use `auto` (not `1fr`) — the grid has no explicit container height, so
+   `1fr` would collapse to zero and let .state-cell's min-height fight the
+   track sizing. `auto` lets each row sit at its content height. */
+.state-grid {
+  display: grid;
+  grid-template-columns: 64px repeat(var(--nb, 5), minmax(0, 1fr));
+  grid-template-rows: 28px repeat(var(--nb, 5), auto);
+  gap: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+  max-width: 760px;
+}
+.state-grid .axis-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+.state-grid .axis-label.col {
+  letter-spacing: 0.5px;
+}
+.state-grid .axis-corner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-secondary);
+  font-size: 7px;
+  text-align: center;
+  line-height: 1.3;
+}
+.state-grid .row-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+}
+.state-grid .state-cell {
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 78px;
+  position: relative;
+  box-shadow: inset 0 0 0 1px var(--bg-strong), inset 0 0 0 2px var(--inner-highlight);
+  color: var(--ink-on-box);
+}
+.state-cell .v-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  color: var(--ink-on-box);
+}
+.state-cell .v-move {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--charmander-orange);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.state-cell.flash {
+  animation: cell-flash 700ms ease-out;
+}
+@keyframes cell-flash {
+  0%   { box-shadow: 0 0 0 4px var(--pikachu-yellow), inset 0 0 0 1px var(--bg-strong), inset 0 0 0 2px var(--inner-highlight); }
+  100% { box-shadow: inset 0 0 0 1px var(--bg-strong), inset 0 0 0 2px var(--inner-highlight); }
+}
+
+/* ---------- Scene 2 (value iteration) clarity redesign ----------
+   Adds: narrator dialog + Bellman-above + two-column grid/inspector +
+   heat-map cell colours + terminal strips + inspector panel. */
+
+.sc2-narrator      { margin: 0 0 10px; }
+.sc2-formula       { margin: 0 0 10px; padding: 8px 14px; }
+.sc2-hud           { margin: 0 0 12px; }
+
+.sc2-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  margin-bottom: 14px;
+  align-items: start;
+}
+.sc2-grid-block {
+  min-width: 0;                   /* let the grid shrink inside flex/grid */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sc2-ctrl { margin-bottom: 10px; }
+
+/* ---------- Inspector panel ---------- */
+.vi-inspector {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--ink-on-box);
+  line-height: 1.55;
+}
+.vi-inspector .ins-placeholder {
+  color: var(--ink-secondary);
+  text-align: center;
+  padding: 28px 8px;
+  line-height: 1.8;
+  font-size: 9px;
+}
+.vi-inspector .ins-state-label {
+  font-size: 10px;
+  color: var(--ink-on-box);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.vi-inspector .ins-current-v {
+  margin-bottom: 10px;
+  font-size: 9px;
+  color: var(--ink-on-box);
+}
+.vi-inspector .ins-num {
+  font-size: 14px;
+  color: var(--pikachu-cheek);
+}
+.vi-inspector .ins-explain {
+  font-size: 8px;
+  color: var(--ink-secondary);
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+.vi-inspector .ins-explain .mono {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+.vi-inspector .ins-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.vi-inspector .ins-move-row {
+  display: grid;
+  grid-template-columns: 1fr auto 52px;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 7px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+}
+.vi-inspector .ins-move-row.argmax {
+  background: rgba(72, 200, 72, 0.18);
+  border-color: var(--hp-green);
+}
+.vi-inspector .ins-move-name { font-size: 8px; }
+.vi-inspector .ins-move-q    { font-size: 10px; color: var(--ink-on-box); justify-self: end; }
+.vi-inspector .ins-arg-arrow { font-size: 7px; color: #2A6A2A; }
+.vi-inspector .ins-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 2px solid var(--rule);
+  font-size: 8px;
+  line-height: 1.7;
+  color: var(--ink-on-box);
+}
+
+/* ---------- Learning curve (scene 4) ---------- */
+.learning-curve {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  padding: 10px;
+  box-shadow: inset 0 0 0 2px var(--bg-strong), inset 0 0 0 4px var(--inner-highlight);
+  width: 100%;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+}
+.learning-curve .lc-svg { width: 100%; height: auto; display: block; }
+.learning-curve .lc-raw { fill: none; stroke: #888; stroke-width: 0.8; opacity: 0.5; }
+.learning-curve .lc-smooth { fill: none; stroke: var(--charmander-orange); stroke-width: 1.6; }
+.learning-curve .lc-cursor { stroke: var(--ink-on-box); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.6; }
+.learning-curve .lc-cursor-marker { fill: var(--pikachu-yellow); stroke: var(--ink-on-box); stroke-width: 0.8; }
+.learning-curve .lc-grid { stroke: var(--inner-highlight); stroke-width: 0.5; stroke-dasharray: 2 3; opacity: 0.4; }
+.learning-curve .lc-tick-label, .learning-curve .lc-axis-label {
+  fill: var(--ink-on-box);
+  font-size: 7px;
+  font-family: 'Press Start 2P', monospace;
+}
+.learning-curve .lc-axis-label { font-size: 8px; }
+
+/* ---------- Scrubber ---------- */
+.scrubber {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--ink-on-box);
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  box-shadow: inset 0 0 0 2px var(--bg-strong), inset 0 0 0 4px var(--inner-highlight);
+  flex-wrap: wrap;
+}
+.scrubber input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1 1 auto;
+  min-width: 120px;
+  height: 8px;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  margin: 0;
+}
+.scrubber input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 16px;
+  background: var(--pikachu-yellow);
+  border: 2px solid var(--rule);
+}
+.scrubber input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 16px;
+  background: var(--pikachu-yellow);
+  border: 2px solid var(--rule);
+}
+.scrubber .scr-label {
+  min-width: 110px;
+  font-size: 9px;
+}
+.scrubber .scr-snapshots { display: flex; gap: 4px; flex-wrap: wrap; }
+.scrubber .scr-snap {
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 2px solid var(--rule);
+  background: #ECE5C8;
+  font-size: 8px;
+  color: var(--ink-on-box);
+  font-family: 'Press Start 2P', monospace;
+}
+.scrubber .scr-snap.active {
+  background: var(--pikachu-yellow);
+}
+
+/* ---------- HUD strip (scene 1) ---------- */
+.hud-strip {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  flex-wrap: wrap;
+  box-shadow: inset 0 0 0 2px var(--bg-strong), inset 0 0 0 4px var(--inner-highlight);
+  color: var(--ink-on-box);
+}
+.hud-strip .hud-item { display: flex; flex-direction: column; gap: 2px; }
+.hud-strip .hud-label {
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #585858;
+}
+.hud-strip .hud-val {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-on-box);
+  font-size: 11px;
+}
+
+/* ---------- Footnote ---------- */
+.footnote {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: var(--ink-secondary);
+  border-top: 2px solid var(--rule);
+  padding-top: 6px;
+  margin-top: 14px;
+  text-align: right;
+}
+.footnote kbd {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  border: 1px solid var(--rule);
+  padding: 0 4px;
+  background: var(--bg-strong);
+  color: var(--ink);
+}
+
+/* ---------- Component colour spans ---------- */
+.comp-mdp     { color: var(--hue-anymal); }
+.comp-eps     { color: var(--hue-casino); }
+.comp-bellman { color: var(--hue-ghost); }
+.comp-rm      { color: var(--hue-star); }
+.comp-door    { color: var(--hue-door); }
+.comp-poke    { color: var(--pikachu-yellow); -webkit-text-stroke: 0.5px var(--ink); }
+
+/* MDP-frame overlay (scene 0) */
+.mdp-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #181818;
+}
+.mdp-overlay .mdp-tag {
+  position: absolute;
+  background: var(--pikachu-yellow);
+  border: 2px solid var(--rule);
+  padding: 3px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 2px 2px 0 0 var(--ink);
+  pointer-events: auto;
+}
+
+/* ============================================================
+   Japanese "flavor mode" — body.lang-jp swaps the primary font
+   to DotGothic16 (a bitmap-style Japanese font from Google Fonts)
+   so the kana glyphs match the chiptune pixel-art feel of the
+   English Press-Start-2P text. Press Start 2P stays as a fallback
+   for Latin glyphs nested inside Japanese strings (e.g. "10まんボルト",
+   "SML · ポケモン", "Q*"), giving us bitmap consistency on both sides.
+
+   DotGothic16 is also listed as a tail fallback even in EN mode so
+   the language-toggle button's "日本語" label renders cleanly without
+   falling back to a system font. ============================ */
+body.lang-jp,
+body.lang-jp button,
+body.lang-jp input,
+body.lang-jp .scene,
+body.lang-jp .topbar {
+  font-family: 'DotGothic16', 'Press Start 2P', 'Courier New', monospace;
+}
+body.lang-jp .scene {
+  /* DotGothic16 is denser per glyph than Press Start 2P. Add a touch
+     of letter-spacing so kana don't run together at small sizes. */
+  letter-spacing: 0.02em;
+}
+/* Even in EN mode, allow Japanese glyphs (only the lang-toggle label
+   right now) to fall through to DotGothic16 rather than the OS default. */
+.theme-toggle, .pager-btn, .topbar .brand, .scene-title {
+  font-family: 'Press Start 2P', 'DotGothic16', 'Courier New', monospace;
+}
+
+/* ============================================================
+   Speaker-notes overlay (press `n`)
+   ----------------------------------------------------------------
+   Fixed in the bottom-right of the viewport.  Lecturer-facing crib
+   sheet keyed by the current scene.  Hidden by default.
+   ============================================================ */
+.speaker-notes-overlay[hidden] { display: none; }
+.speaker-notes-overlay {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9990;
+  width: 500px;
+  max-width: calc(100vw - 36px);
+  pointer-events: none;
+}
+.speaker-notes-card {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong),
+    4px 4px 0 0 rgba(0, 0, 0, 0.20);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.7;
+  color: var(--ink-on-box);
+  padding: 14px 18px 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+.speaker-notes-title {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--pikachu-cheek);
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--rule);
+  padding-bottom: 6px;
+}
+.speaker-notes-title kbd {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 1px 5px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink-on-box);
+}
+.speaker-notes-content h3 {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--pikachu-cheek);
+  margin: 0 0 8px;
+}
+.speaker-notes-content p { margin: 4px 0 8px; }
+.speaker-notes-content ul {
+  margin: 4px 0 6px;
+  padding-left: 14px;
+  list-style: square;
+}
+.speaker-notes-content li { margin: 4px 0; }
+.speaker-notes-content kbd {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7.5px;
+  padding: 1px 4px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+}
+.speaker-notes-content b { color: var(--pikachu-cheek); }
+.speaker-notes-content em { color: var(--cb-blue); font-style: normal; }
+
+/* ============================================================
+   Trainer badges in the topbar
+   ----------------------------------------------------------------
+   Five concept badges (MDP, RTN, Q*, DP, SAR) sit between the
+   dot-pager and the music toggle.  Grey when unearned, glowing
+   yellow when earned.  Awarded on first visit to each concept
+   scene; persisted via window.Trainer / localStorage.
+   ============================================================ */
+.trainer-badges {
+  display: flex;
+  gap: 4px;
+  margin: 0 6px;
+  align-items: center;
+}
+.trainer-badge {
+  width: 30px;
+  height: 22px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  opacity: 0.4;
+  transition: opacity 200ms, background 200ms, color 200ms;
+}
+.trainer-badge.earned {
+  background: var(--pikachu-yellow);
+  color: var(--ink-on-box);
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px var(--inner-highlight);
+}
+.trainer-badge.mdp.earned    { background: #D55E00; color: #fff; }   /* MDP — red-orange */
+.trainer-badge.return.earned { background: #0072B2; color: #fff; }   /* RTN — blue */
+.trainer-badge.qstar.earned  { background: var(--pikachu-yellow); }
+.trainer-badge.dp.earned     { background: #009E73; color: #fff; }   /* DP — green */
+.trainer-badge.sarsa.earned  { background: #CC79A7; color: #fff; }   /* SAR — purple */
+
+@keyframes trainer-badge-flash {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 var(--pikachu-yellow); }
+  40%  { transform: scale(1.3);  box-shadow: 0 0 0 8px var(--pikachu-yellow); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 transparent; }
+}
+.trainer-badge.flashing {
+  animation: trainer-badge-flash 1.0s ease-out;
+  z-index: 4;
+  position: relative;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trainer-badge.flashing { animation: none; }
+}
+
+/* ============================================================
+   Trainer-name modal — first-visit prompt
+   ============================================================ */
+.trainer-name-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9995;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.trainer-name-card {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong),
+    4px 4px 0 0 rgba(0, 0, 0, 0.20);
+  padding: 22px 26px;
+  width: 340px;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+  text-align: center;
+}
+.trainer-name-title {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--pikachu-cheek);
+  margin-bottom: 10px;
+}
+.trainer-name-prompt {
+  font-size: 9px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.trainer-name-card input[type="text"] {
+  width: 100%;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0.08em;
+  padding: 8px;
+  border: 3px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink-on-box);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.trainer-name-ctrls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.trainer-name-hint {
+  font-size: 7px;
+  color: var(--ink-secondary);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Slide mode (`f` hotkey)
+   ----------------------------------------------------------------
+   Hides the topbar and stretches the scene container.  ESC exits.
+   ============================================================ */
+body.slide-mode .topbar { display: none; }
+body.slide-mode .stage  { padding: 12px 18px; }
+
+/* ============================================================
+   Centered overlays — shared by quick-jump (`g`) and help (`?`)
+   ============================================================ */
+.centered-overlay[hidden] { display: none; }
+.centered-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9994;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+.centered-card {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong),
+    4px 4px 0 0 rgba(0, 0, 0, 0.20);
+  padding: 18px 22px;
+  min-width: 420px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+}
+.centered-title {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--pikachu-cheek);
+  text-align: center;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--rule);
+  padding-bottom: 8px;
+}
+.centered-card kbd {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8.5px;
+  padding: 2px 6px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+  color: var(--ink-on-box);
+  display: inline-block;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Quick-jump list */
+.quick-jump-card { min-width: 480px; }
+.quick-jump-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.quick-jump-row {
+  display: grid;
+  grid-template-columns: 30px 40px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--ink-on-box);
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.quick-jump-row:hover { background: var(--pikachu-yellow); }
+.quick-jump-row.current { background: var(--pikachu-yellow); box-shadow: inset 0 0 0 2px var(--pikachu-cheek); }
+.qj-num    { color: var(--ink-secondary); font-size: 8px; }
+.qj-title  { color: var(--ink-on-box); }
+.qj-key-empty { display: inline-block; min-width: 18px; }
+
+/* Help-overlay rows */
+.help-card .help-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 9px;
+  color: var(--ink-on-box);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+}
+.help-card .help-row:last-child { border-bottom: none; }
+.help-card-section {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  color: var(--pikachu-cheek);
+  margin: 12px 0 6px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 4px;
+}
+.help-mouse {
+  display: inline-block;
+  text-align: center;
+  font-size: 14px;
+  min-width: 28px;
+}
+
+/* Slide-mode toast — bottom-right, fades in/out, ~2.4 s. */
+.slide-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 99990;
+  background: var(--pikachu-yellow);
+  color: var(--ink-on-box);
+  border: 3px solid var(--rule);
+  padding: 8px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.20);
+  pointer-events: none;
+  animation: slide-toast-life 2.4s ease-out forwards;
+}
+@keyframes slide-toast-life {
+  0%   { opacity: 0; transform: translateX(20px); }
+  10%  { opacity: 1; transform: translateX(0); }
+  85%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(20px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-toast { animation: none; }
+}
+
+/* ============================================================
+   Boot-up animation — Game Boy-style "Nintendo" splash
+   ----------------------------------------------------------------
+   Drops "SML" from the top, lingers, fades out.  ~1.5 s total.
+   Fires once per browser session (sessionStorage flag).
+   ============================================================ */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.boot-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: boot-drop 700ms cubic-bezier(.4, 1.8, .6, 1) 60ms backwards;
+}
+.boot-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 64px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+.boot-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-secondary);
+  animation: boot-tag-in 320ms ease-out 520ms backwards;
+}
+.boot-overlay.boot-fade {
+  opacity: 0;
+  transition: opacity 320ms ease-out;
+}
+@keyframes boot-drop {
+  0%   { transform: translateY(-220px); opacity: 0; }
+  60%  { transform: translateY(8px);    opacity: 1; }
+  100% { transform: translateY(0);      opacity: 1; }
+}
+@keyframes boot-tag-in {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-stack { animation: none; }
+  .boot-tag   { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile (≤ 720px). The pixel-font chrome packs brand + title + ~7 buttons
+   into one flex row at desktop; on a phone the row overflows and the
+   scene-title gets squeezed into a vertical column. Below 720px the
+   topbar collapses to three wrapping rows:
+     row 1 — brand
+     row 2 — PREV + dot-pager + NEXT  (primary navigation, big taps)
+     row 3 — trainer-badges            (full-width, centered)
+     row 4 — music + lang + theme     (secondary toggles, compact)
+   The trainer-badges row forces a wrap via `flex: 1 1 100%`, which pushes
+   the three secondary toggles to a fresh row beneath it. The scene-title
+   is hidden — every scene already opens with its own H2 — and per-scene
+   responsive rules (sd-row, sd-f-row, tut-welcome, Q-table scroll) live
+   alongside their desktop rules in the scene CSS files.
+   --------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+    row-gap: 10px;
+  }
+  .topbar .scene-title { display: none; }
+  .topbar .brand { flex: 1 1 auto; font-size: 10px; }
+
+  /* Right cluster spans full width below the brand and wraps its own
+     children into the three rows described above. */
+  .topbar .right-cluster {
+    flex: 0 0 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Row 2 — primary pager controls get the iOS-tappable size. */
+  .topbar .right-cluster #prev-btn,
+  .topbar .right-cluster #next-btn {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 10px;
+  }
+  .topbar .right-cluster .dot-pager {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .dot-pager .dot { width: 12px; height: 12px; }
+
+  /* Row 3 — trainer badges, forced to their own full-width row. */
+  .topbar .right-cluster .trainer-badges {
+    flex: 1 1 100%;
+    margin: 0;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  /* Row 4 — secondary toggles. Compact (these are tapped once per
+     session, not primary actions) so the three fit on one row. */
+  .topbar .right-cluster #theme-toggle,
+  .topbar .right-cluster #music-toggle,
+  .topbar .right-cluster #lang-toggle {
+    min-height: 30px;
+    padding: 6px 10px;
+    font-size: 8px;
+  }
+
+  .stage {
+    padding: 0 12px;
+    margin: 12px auto 24px;
+    min-height: calc(100dvh - 220px);
+  }
+  .scene { left: 12px; right: 12px; }
+  .scene.active { left: 0; right: 0; }
+
+  /* Cards/scene-row helpers: two-column scene-rows fall back to stack. */
+  .scene-row { gap: 12px; }
+  .scene-pad { padding: 8px 0 18px; }
+}
+
+/* =====================================================================
+   PRESS YOUR LUCK shared widgets: the table-card state-icon, the die,
+   and the one-time intro modal. Board cells live in css/qtable.css.
+   All colours resolve from the --c-roll / --c-hold / --chip-* / --stand-*
+   tokens above, so the CRT theme retints automatically.
+   ===================================================================== */
+
+/* ---- table-card: pot meter (left) + standing badge (right) ---- */
+.table-card {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  font-family: 'Press Start 2P', monospace;
+}
+.table-card-compact { gap: 5px; transform-origin: top left; }
+
+.tc-pot-meter {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  padding: 4px;
+  min-width: 34px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: inset 0 0 0 2px var(--inner-highlight);
+}
+.tc-chip-row {
+  height: 12px;
+  border: 2px solid var(--rule);
+  background: var(--chip-off);
+  image-rendering: pixelated;
+}
+.tc-chip-row.tc-chip-on {
+  background: linear-gradient(180deg, var(--chip-on-hi), var(--chip-on));
+}
+.tc-chip-row.tc-chip-danger.tc-chip-on {
+  background: linear-gradient(180deg, var(--chip-danger-hi), var(--chip-danger));
+}
+.tc-pot-label {
+  margin-top: 4px;
+  font-size: 7px;
+  text-align: center;
+  color: var(--ink-on-box);
+}
+.table-card-compact .tc-chip-row { height: 7px; border-width: 1px; }
+.table-card-compact .tc-pot-meter { min-width: 22px; padding: 2px; gap: 2px; }
+.table-card-compact .tc-pot-label { font-size: 6px; }
+
+.tc-standing-badge {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: inset 0 0 0 2px var(--inner-highlight);
+}
+.tc-bar-row { display: flex; align-items: center; gap: 6px; }
+.tc-bar-tag { font-size: 7px; width: 38px; color: var(--ink-on-box); }
+.tc-bar-track {
+  flex: 1 1 auto;
+  height: 9px;
+  border: 2px solid var(--rule);
+  background: var(--stand-track);
+}
+.tc-bar-fill { display: block; height: 100%; width: 0%; transition: width 0.25s steps(8); }
+.tc-bar-num { font-size: 8px; width: 22px; text-align: right; color: var(--ink-on-box); }
+.tc-standing-tag {
+  margin-top: 2px;
+  font-size: 8px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+/* Standing tints colour both the "you" fill and the standing tag. */
+.tc-stand-behind .tc-fill-you, .tc-stand-behind .tc-fill-riv { background: var(--stand-behind); }
+.tc-stand-even   .tc-fill-you, .tc-stand-even   .tc-fill-riv { background: var(--stand-even); }
+.tc-stand-ahead  .tc-fill-you, .tc-stand-ahead  .tc-fill-riv { background: var(--stand-ahead); }
+.tc-stand-behind .tc-standing-tag { color: var(--stand-behind); }
+.tc-stand-even   .tc-standing-tag { color: var(--stand-even); }
+.tc-stand-ahead  .tc-standing-tag { color: var(--stand-ahead); }
+/* The rival bar is always drawn in a neutral ink so "you vs rival" reads. */
+.tc-fill-riv { opacity: 0.55; }
+.table-card-compact .tc-bar-tag,
+.table-card-compact .tc-standing-tag { font-size: 6px; }
+.table-card-compact .tc-standing-badge { padding: 3px; gap: 3px; }
+
+/* ---- the die ---- */
+.pyl-die { display: inline-block; }
+.pyl-die-cube {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  padding: 7px;
+  border: 4px solid var(--rule);
+  border-radius: 9px;
+  background: var(--card-bg);
+  box-shadow: inset 0 0 0 2px var(--inner-highlight), 3px 3px 0 var(--rule);
+}
+.pyl-die-pip {
+  align-self: center;
+  justify-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: transparent;
+}
+.pyl-die-pip.on { background: var(--ink); }
+.pyl-die-one .pyl-die-pip.on { background: var(--chip-danger); }   /* the bust face */
+.pyl-die-leap { animation: pyl-die-tumble 0.7s steps(6) 1; }
+.pyl-die-bust { box-shadow: inset 0 0 0 2px var(--chip-danger), 3px 3px 0 var(--chip-danger); }
+@keyframes pyl-die-tumble {
+  0%   { transform: translateY(0) rotate(0deg); }
+  25%  { transform: translateY(-22px) rotate(120deg); }
+  50%  { transform: translateY(-6px) rotate(240deg); }
+  75%  { transform: translateY(-14px) rotate(340deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pyl-die-leap { animation: none; }
+}
+
+/* Screen-shake: the die adds this to its shake target on a bust (a 1).
+   Scenes can also add it directly to feel the felt-bust. */
+.pyl-screen-shake { animation: pyl-screen-shake 0.42s steps(2, end); }
+@keyframes pyl-screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  12% { transform: translate(-5px, 1px); }
+  28% { transform: translate(5px, -1px); }
+  44% { transform: translate(-4px, 2px); }
+  60% { transform: translate(4px, -1px); }
+  76% { transform: translate(-2px, 1px); }
+  88% { transform: translate(2px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pyl-screen-shake { animation: none; }
+}
+
+/* ---- pot-meter dynamics (THE ROLL): a freshly-lit chip pops; a bust
+   collapses + greys the whole stack. Scenes drive these classes on the
+   TableCard's .tc-chip-row / .tc-pot-meter (exposed via card.rows / .meter). */
+.tc-chip-row.tc-chip-pop { animation: pyl-chip-pop 0.32s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pyl-chip-pop {
+  0%   { transform: scaleX(0.2); filter: brightness(1.8); }
+  60%  { transform: scaleX(1.12); filter: brightness(1.4); }
+  100% { transform: scaleX(1); filter: brightness(1); }
+}
+.tc-pot-meter.tc-pot-collapse .tc-chip-row.tc-chip-on {
+  animation: pyl-chip-collapse 0.4s ease-in forwards;
+}
+@keyframes pyl-chip-collapse {
+  0%   { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(14px); filter: grayscale(1) brightness(0.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tc-chip-row.tc-chip-pop,
+  .tc-pot-meter.tc-pot-collapse .tc-chip-row.tc-chip-on { animation: none; }
+}
+
+/* Flying "+N" chip the pot-pop sends onto the stack. Scenes spawn a
+   .pyl-fly-chip element near the die and let it arc to the meter. */
+.pyl-fly-chip {
+  position: absolute;
+  z-index: 40;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--chip-on-hi);
+  background: var(--chip-on);
+  border: 2px solid var(--rule);
+  padding: 2px 5px;
+  pointer-events: none;
+  text-shadow: 1px 1px 0 var(--rule);
+  animation: pyl-fly-chip 0.55s ease-out forwards;
+}
+@keyframes pyl-fly-chip {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-26px) scale(1.05); }
+}
+@media (prefers-reduced-motion: reduce) { .pyl-fly-chip { animation: none; opacity: 0; } }
+
+/* ---- banked-score counter: the mono "what you've locked in" readout that
+   HOLD slides chips into. Big tabular digits in a chunky bordered box. */
+.pyl-bank {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: inset 0 0 0 2px var(--inner-highlight), 2px 2px 0 0 rgba(0,0,0,0.18);
+  font-family: 'Press Start 2P', monospace;
+}
+.pyl-bank-label {
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+}
+.pyl-bank-num {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-on-box);
+  letter-spacing: 1px;
+}
+.pyl-bank.pyl-bank-you .pyl-bank-num { color: var(--c-roll); }
+.pyl-bank.pyl-bank-riv .pyl-bank-num { color: var(--ink-secondary); }
+/* The "chunk" tick when a HOLD banks the pot. */
+.pyl-bank.pyl-bank-chunk { animation: pyl-bank-chunk 0.3s ease-out; }
+@keyframes pyl-bank-chunk {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); box-shadow: 0 0 0 4px var(--chip-on), inset 0 0 0 2px var(--inner-highlight); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .pyl-bank.pyl-bank-chunk { animation: none; } }
+
+/* ---- return tape: the running G_t = win/lose-from-here strip beneath the
+   board. A row of step cells (situation -> lever -> reward) the trajectory /
+   return scenes lay out left to right. */
+.pyl-return-tape {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: inset 0 0 0 2px var(--inner-highlight);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+.pyl-tape-label {
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  color: var(--ink-secondary);
+  align-self: center;
+  margin-right: 4px;
+  text-transform: uppercase;
+}
+.pyl-tape-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 30px;
+  padding: 3px 4px;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+}
+.pyl-tape-step .pyl-tape-lever { font-size: 7px; letter-spacing: 0.5px; }
+.pyl-tape-step.pyl-tape-roll .pyl-tape-lever { color: var(--c-roll); }
+.pyl-tape-step.pyl-tape-hold .pyl-tape-lever { color: var(--c-hold); }
+.pyl-tape-step .pyl-tape-r { font-size: 8px; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.pyl-tape-step.pyl-tape-bust { border-color: var(--chip-danger); }
+.pyl-tape-step.pyl-tape-bust .pyl-tape-lever { color: var(--chip-danger); }
+.pyl-tape-step.pyl-tape-terminal { background: var(--chip-on); color: var(--rule); }
+.pyl-tape-step.pyl-tape-terminal .pyl-tape-r { color: var(--rule); font-weight: bold; }
+
+/* ---- one-time intro modal ---- */
+.pyl-intro-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+.pyl-intro-card {
+  max-width: 460px;
+  margin: 16px;
+  padding: 22px;
+  border: 4px solid var(--rule);
+  background: var(--bg-strong);
+  box-shadow: inset 0 0 0 3px var(--inner-highlight), 6px 6px 0 var(--rule);
+  text-align: center;
+}
+.pyl-intro-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: var(--c-roll);
+  margin-bottom: 12px;
+}
+.pyl-intro-body {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--ink-on-box);
+  margin-bottom: 16px;
+}
+.pyl-intro-card .poke-btn { margin: 0 auto; }
+
+/* Generic Press Your Luck button alias (mirrors .poke-btn so existing
+   button styling applies; scenes may use either class). */
+.pyl-btn { cursor: pointer; }
+
+/* ============================================================
+   Chunky pixel button (.poke-btn / .pyl-btn) - the in-game action
+   button used across the concept scenes (STEP / PLAY / RESET / ROLL /
+   HOLD / SAMPLE). Referenced by the foundation intro card and the
+   reused trajectory idiom; defined here so every scene shares one look.
+   ============================================================ */
+.poke-btn, .pyl-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-on-box);
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  border-radius: 0;
+  padding: 8px 12px;
+  cursor: pointer;
+  box-shadow: inset -2px -2px 0 0 var(--inner-highlight), 2px 2px 0 0 rgba(0, 0, 0, 0.18);
+}
+.poke-btn:hover, .pyl-btn:hover { background: var(--pikachu-yellow); color: var(--rule); }
+.poke-btn:active, .pyl-btn:active { box-shadow: inset 2px 2px 0 0 var(--inner-highlight); transform: translate(1px, 1px); }
+.poke-btn:disabled, .pyl-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+/* ROLL / HOLD tinted variants (the two levers, as lever-coloured buttons). */
+.poke-btn.btn-roll { color: var(--c-roll-ink); background: var(--c-roll); border-color: var(--rule); }
+.poke-btn.btn-roll:hover { background: var(--chip-on-hi); color: var(--rule); }
+.poke-btn.btn-hold { color: var(--c-hold-ink); background: var(--c-hold); border-color: var(--rule); }
+.poke-btn.btn-hold:hover { background: var(--c-hold-soft); color: var(--rule); }
+
+/* ============================================================
+   Shared "concept scene" chrome (.concept-*) - the KaTeX-heavy,
+   minimal-text layout used by the trajectory / return / Q* scenes (and
+   any later formula scene). The CRT phosphor-glow override for
+   .concept-heading already lives near the top of this file; these are
+   the base (light-theme) definitions it builds on.
+   ============================================================ */
+.concept-scene {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.concept-heading {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  margin: 6px 0 2px;
+  color: var(--ink);
+}
+.concept-lede {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--ink-secondary);
+  margin: 0 2px 4px;
+  max-width: 90ch;
+}
+.concept-lede b { color: var(--ink-on-box); }
+.concept-formula-card {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  padding: 16px 20px;
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong);
+  color: var(--ink-on-box);
+  text-align: center;
+  /* A long KaTeX line (e.g. the τ = (S₁,A₁,R₁, …) trajectory) must scroll
+     INSIDE the card on a 390px viewport rather than widen the whole page. */
+  max-width: 100%;
+  overflow-x: auto;
+}
+.concept-formula-card .katex-display { margin: 0; }
+.concept-formula-card .katex { color: var(--ink-on-box); }
+.concept-formula-card.compact { padding: 12px 16px; }
+.concept-formula-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ink-secondary);
+  margin-bottom: 10px;
+}
+.concept-formula-foot {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin-top: 10px;
+}
+.concept-key-question {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding: 14px;
+  color: var(--pikachu-cheek);
+  border: 3px solid var(--pikachu-cheek);
+  background: var(--bg-strong);
+}

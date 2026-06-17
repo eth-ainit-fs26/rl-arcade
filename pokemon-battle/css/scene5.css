@@ -1,0 +1,469 @@
+/* Scene 5 — recap cards, restyled as a Pokemon League Hall of Fame.
+   Twinkling starfield in the background; champion banner above the
+   heading; cards animate in one-by-one. */
+
+/* Twinkling starfield — stacked radial-gradient dots that fade in
+   and out on a slow loop.  Sits behind everything in the scene. */
+.sc5-scene {
+  position: relative;
+  isolation: isolate;
+}
+.sc5-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8% 12%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 22% 38%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 38% 8%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 54% 28%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 68% 14%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 82% 40%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 94% 18%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 14% 64%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 28% 88%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 48% 70%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 62% 92%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 78% 76%, var(--ink) 1px, transparent 1.5px),
+    radial-gradient(1.5px 1.5px at 90% 88%, var(--ink) 1px, transparent 1.5px);
+  opacity: 0.16;
+  animation: sc5-twinkle 5.5s ease-in-out infinite;
+}
+@keyframes sc5-twinkle {
+  0%, 100% { opacity: 0.10; }
+  50%      { opacity: 0.22; }
+}
+
+/* HALL OF FAME banner — pixel-art-style title bar above the heading.
+   The yellow inset border + black outer rule mirrors the in-game
+   Pokemon-box style. */
+.sc5-hof-banner {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  letter-spacing: 0.10em;
+  text-align: center;
+  padding: 8px 14px;
+  margin: 2px auto 6px;
+  max-width: 32ch;
+  color: var(--ink-on-box);
+  background: var(--pikachu-yellow);
+  border: 3px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--pikachu-yellow),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--pikachu-yellow),
+    3px 3px 0 0 rgba(0, 0, 0, 0.20);
+  text-shadow: 2px 2px 0 var(--bg-strong);
+  animation: sc5-banner-pop 480ms ease-out 60ms backwards;
+}
+.sc5-hof-banner .sc5-star {
+  display: inline-block;
+  color: var(--pikachu-cheek);
+  animation: sc5-star-spin 2.4s ease-in-out infinite;
+  margin: 0 6px;
+}
+.sc5-hof-banner .sc5-star:last-child {
+  animation-delay: -1.2s;
+}
+@keyframes sc5-banner-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes sc5-star-spin {
+  0%, 100% { transform: rotate(-12deg) scale(1);   }
+  50%      { transform: rotate(12deg)  scale(1.2); }
+}
+
+.sc5-sub {
+  text-align: center;
+  margin: 0 auto 8px;
+  max-width: 70ch;
+  font-size: 8.5px;
+  line-height: 1.55;
+}
+
+/* ============================================================
+   TRAINER CARD — replaces the generic "YOU'VE TRAINED PIKACHU"
+   heading.  Personal banner with the student's name, earned badges
+   (with timestamps), and lifetime stats.
+   ============================================================ */
+.sc5-trainer-card-host {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 8px;
+  width: 100%;
+}
+.sc5-trainer-card {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong),
+    3px 3px 0 0 rgba(0, 0, 0, 0.20);
+  padding: 10px 18px;
+  max-width: 720px;
+  min-width: 540px;
+  position: relative;
+  animation: sc5-trainer-card-enter 520ms ease-out backwards;
+  animation-delay: 60ms;
+}
+.sc5-trainer-card.champion {
+  background: linear-gradient(135deg, var(--pikachu-yellow) 0%, var(--bg-strong) 100%);
+}
+@keyframes sc5-trainer-card-enter {
+  0%   { transform: translateY(-12px); opacity: 0; }
+  100% { transform: translateY(0);     opacity: 1; }
+}
+.sc5-tc-pika {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+/* Victory bounce on first-ever-visit; otherwise idle bob. */
+.sc5-trainer-card .sc5-tc-pika           { animation: sc5-tc-pika-idle 1.6s ease-in-out infinite; }
+.sc5-trainer-card-celebrate .sc5-tc-pika { animation: sc5-tc-pika-victory 0.55s ease-in-out infinite; }
+@keyframes sc5-tc-pika-idle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+@keyframes sc5-tc-pika-victory {
+  0%, 100% { transform: translateY(0)    rotate(-3deg); }
+  50%      { transform: translateY(-8px) rotate(3deg);  }
+}
+
+.sc5-tc-body { min-width: 0; }
+.sc5-tc-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-on-box);
+  margin-bottom: 8px;
+}
+.sc5-trainer-card.champion .sc5-tc-name { color: var(--pikachu-cheek); }
+
+.sc5-tc-badges {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.sc5-tc-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 2px;
+  background: var(--bg);
+  border: 2px solid var(--rule);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+  opacity: 0.4;
+}
+.sc5-tc-badge.earned { opacity: 1; }
+.sc5-tc-badge.mdp.earned    { background: #D55E00; color: #FFFFFF; }
+.sc5-tc-badge.return.earned { background: #0072B2; color: #FFFFFF; }
+.sc5-tc-badge.qstar.earned  { background: var(--pikachu-yellow); color: var(--ink-on-box); }
+.sc5-tc-badge.dp.earned     { background: #009E73; color: #FFFFFF; }
+.sc5-tc-badge.sarsa.earned  { background: #CC79A7; color: #FFFFFF; }
+.sc5-tc-badge-mark  { font-size: 13px; line-height: 1; }
+.sc5-tc-badge-label { font-size: 8px;  letter-spacing: 0.04em; }
+.sc5-tc-badge-date  { font-size: 6px;  letter-spacing: 0.02em; opacity: 0.85; }
+
+.sc5-tc-stats {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-secondary);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.sc5-tc-stats b { color: var(--pikachu-cheek); }
+
+/* ============================================================
+   First-visit-ever confetti — 50 colored pixels rain across the
+   scene for ~3 s.  Pure CSS keyframes, JS spawns the pieces.
+   ============================================================ */
+.sc5-confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+.sc5-confetti {
+  position: absolute;
+  top: -20px;
+  left: var(--x, 50%);
+  width: var(--w, 6px);
+  height: var(--w, 6px);
+  background: var(--color, var(--pikachu-yellow));
+  animation: sc5-confetti-fall var(--dur, 2s) ease-in var(--delay, 0s) forwards;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.18);
+}
+@keyframes sc5-confetti-fall {
+  0%   { transform: translateY(0) rotate(0);              opacity: 1; }
+  90%  {                                                  opacity: 1; }
+  100% { transform: translateY(90vh) rotate(var(--rot, 360deg)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc5-trainer-card,
+  .sc5-trainer-card .sc5-tc-pika,
+  .sc5-trainer-card-celebrate .sc5-tc-pika,
+  .sc5-confetti {
+    animation: none;
+  }
+}
+.sc5-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.sc5-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 12px;
+  min-height: 0;
+  /* Staggered entry — each card sets --i inline; the 180ms-per-card
+     cadence times with the win-fanfare's 4-note arpeggio.  backwards
+     keeps the pre-animation state (invisible) until each card's
+     delay elapses, so we don't see a flash of the final state. */
+  animation: sc5-card-enter 520ms cubic-bezier(.2, .8, .3, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 180ms + 220ms);
+}
+@keyframes sc5-card-enter {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+/* Card header — badge tile + title in one row.  Badge tile reuses the
+   concept-colour scheme from .sc5-tc-badge so the recap card visually
+   matches the topbar/trainer-card pip. */
+.sc5-card .sc5-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.sc5-card .sc5-card-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 4px 2px;
+  border: 2px solid var(--ink);
+  background: #BBB;
+  color: var(--ink);
+  font-family: 'Press Start 2P', monospace;
+  flex-shrink: 0;
+  box-shadow: inset -2px -2px 0 0 rgba(0,0,0,0.18);
+}
+.sc5-card .sc5-card-badge.mdp.earned    { background: #D55E00; color: #FFFFFF; }
+.sc5-card .sc5-card-badge.return.earned { background: #0072B2; color: #FFFFFF; }
+.sc5-card .sc5-card-badge.qstar.earned  { background: var(--pikachu-yellow); color: var(--ink-on-box); }
+.sc5-card .sc5-card-badge.dp.earned     { background: #009E73; color: #FFFFFF; }
+.sc5-card .sc5-card-badge.sarsa.earned  { background: #CC79A7; color: #FFFFFF; }
+.sc5-card .sc5-card-badge-mark  { font-size: 12px; line-height: 1; }
+.sc5-card .sc5-card-badge-label { font-size: 8px; letter-spacing: 0.04em; margin-top: 2px; }
+.sc5-card .sc5-card-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--ink-on-box);
+}
+
+/* Visual slot — small Gen-1-styled glyph specific to each badge. */
+.sc5-card .sc5-card-visual {
+  margin: 4px 0 2px;
+  padding: 6px 4px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+}
+.sc5-card .sc5-caption {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.55;
+  color: var(--ink-on-box);
+  margin-top: 2px;
+}
+
+/* ---- MDP glyph: 4-tile strip ---- */
+.sc5-mdp-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+.sc5-mdp-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  text-align: center;
+}
+.sc5-mdp-letter {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--pikachu-cheek);
+  line-height: 1;
+}
+.sc5-mdp-mini {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  color: var(--ink-on-box);
+  letter-spacing: 0.04em;
+}
+
+/* ---- RETURN glyph: reward tape + sum ---- */
+.sc5-rtn-tape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: var(--ink-on-box);
+}
+.sc5-rtn-r {
+  display: inline-block;
+  padding: 3px 5px;
+  background: var(--card);
+  border: 1px solid var(--ink);
+}
+.sc5-rtn-r.sc5-rtn-final {
+  background: #009E73;
+  color: #FFFFFF;
+}
+.sc5-rtn-arrow { color: #888; }
+.sc5-rtn-sum {
+  margin-left: 4px;
+  color: var(--pikachu-cheek);
+}
+.sc5-rtn-formula {
+  margin-top: 6px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+
+/* ---- Q* glyph: three action cells, one starred ---- */
+.sc5-qstar-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+.sc5-qstar-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+  text-align: center;
+}
+.sc5-qstar-cell.sc5-qstar-best {
+  background: var(--pikachu-yellow);
+  color: var(--ink-on-box);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px #B89020;
+}
+.sc5-qstar-name {
+  font-size: 8px;
+  letter-spacing: 0.04em;
+}
+.sc5-qstar-val {
+  font-size: 10px;
+  margin-top: 2px;
+}
+.sc5-qstar-formula {
+  margin-top: 6px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+
+/* ---- DP glyph: root Q-cell + two Bellman branches ---- */
+.sc5-dp-root {
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--ink-on-box);
+  padding: 4px 6px;
+  background: var(--pikachu-yellow);
+  border: 1px solid var(--ink);
+  margin: 0 auto 4px;
+  display: inline-block;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sc5-dp-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sc5-dp-branch {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+  padding: 4px 6px;
+  background: var(--card);
+  border-left: 3px solid #009E73;
+}
+
+/* ---- SARSA glyph: 5-chip tuple + update ---- */
+.sc5-sarsa-tape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.sc5-sarsa-chip {
+  display: inline-block;
+  min-width: 24px;
+  padding: 4px 6px;
+  border: 1px solid var(--ink);
+  background: var(--card);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: var(--ink-on-box);
+  text-align: center;
+}
+.sc5-sarsa-chip.k-s { background: #FBE7C0; }
+.sc5-sarsa-chip.k-a { background: #C9E7F4; }
+.sc5-sarsa-chip.k-r { background: #F4C9C9; }
+.sc5-sarsa-update {
+  margin-top: 6px;
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc5-scene::before,
+  .sc5-hof-banner,
+  .sc5-hof-banner .sc5-star,
+  .sc5-card {
+    animation: none;
+  }
+}

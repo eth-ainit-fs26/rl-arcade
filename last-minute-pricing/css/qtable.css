@@ -1,0 +1,277 @@
+/* qtable.css -- the 5x4 PRICING BOARD widget (window.QTable, js/qtable.js).
+ *
+ *   Reskinned from the Pokemon 5x5 bucket grid. The board is a 5-row (units
+ *   5..1) x 4-col (days 4..1) grid of situation cells plus a dark MIDNIGHT
+ *   gutter on the right. Each cell carries a mini shelf-card icon and three
+ *   lever rows; the argmax row is starred and the whole cell is tinted with
+ *   the winning lever's region colour (.lever-tint-* from style.css), so the
+ *   three coloured regions with their diagonal seam read at projector scale.
+ *
+ *   All colour comes from CSS tokens, so the CRT retint is automatic. */
+
+.qtable-host {
+  display: block;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box, #000);
+}
+
+/* Column headers: a corner label + COLS day columns + the MIDNIGHT gutter. */
+.q-col-heads {
+  display: grid;
+  grid-template-columns: 54px repeat(var(--cols, 4), minmax(0, 1fr)) 92px;
+  gap: 6px;
+  margin-bottom: 5px;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+}
+.q-corner-head { align-self: end; padding-bottom: 2px; color: var(--ink-secondary); }
+.q-col-head {
+  text-align: center;
+  align-self: end;
+  padding-bottom: 2px;
+}
+.q-col-head.q-gutter-head { color: var(--ink-secondary); }
+
+/* The board grid: row-label column + COLS cells + MIDNIGHT gutter column. */
+.q-grid {
+  display: grid;
+  grid-template-columns: 54px repeat(var(--cols, 4), minmax(0, 1fr)) 92px;
+  grid-template-rows: repeat(var(--rows, 5), auto);
+  gap: 6px;
+}
+
+.q-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  text-align: center;
+}
+
+/* MIDNIGHT gutter: one tall dark cell spanning all rows. */
+.q-midnight-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--midnight-bg);
+  border: 3px solid var(--rule);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.35);
+  color: #F0E0C0;
+  text-align: center;
+  padding: 8px 6px;
+}
+.q-gutter-label {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  color: #F0E0C0;
+}
+.q-gutter-sub {
+  font-size: 7px;
+  line-height: 1.5;
+  color: #C8B48C;
+}
+
+/* A board cell. The lever-region tint (.lever-tint-*) is applied by the JS
+   on update; the base cell is the neutral card. */
+.q-cell {
+  position: relative;
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  box-shadow: inset -2px -2px 0 0 rgba(0, 0, 0, 0.12), 2px 2px 0 0 rgba(0, 0, 0, 0.18);
+  padding: 6px 6px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 8px;
+  color: var(--ink-on-box);
+  overflow: hidden;
+  transition: background 200ms, opacity 200ms;
+}
+.q-cell.unvisited { opacity: 0.6; }
+.q-cell.clickable { cursor: pointer; }
+.q-cell.clickable:hover { box-shadow: 0 0 0 2px var(--lever-standard), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+
+/* The mini shelf-card icon, centered at the top of the cell. */
+.q-shelf {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.16);
+}
+
+/* The three lever rows. */
+.q-bars { display: flex; flex-direction: column; gap: 2px; }
+.q-bar-row {
+  display: grid;
+  grid-template-columns: 10px 10px 1fr auto;
+  gap: 4px;
+  align-items: center;
+  font-size: 7px;
+  padding: 1px 3px;
+}
+/* Press Start 2P has no star glyph, so the ★ mark + the legend star fall
+   through to DotGothic16 (bitmap, includes ★) before any system font. */
+.q-mark {
+  width: 10px;
+  text-align: center;
+  color: var(--lever-firesale);
+  font-weight: bold;
+  font-family: 'DotGothic16', 'Press Start 2P', monospace;
+  font-size: 9px;
+}
+.q-swatch {
+  width: 9px; height: 9px;
+  border: 1px solid var(--rule);
+  box-sizing: border-box;
+}
+.q-label { font-size: 7px; letter-spacing: 0.04em; }
+.q-val { font-size: 8px; text-align: right; font-variant-numeric: tabular-nums; }
+.q-bar-row.argmax {
+  background: rgba(0, 0, 0, 0.10);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+.q-bar-row.argmax .q-val,
+.q-bar-row.argmax .q-label { font-weight: bold; }
+
+/* On a tinted (visited) cell the chrome reads on a saturated background.
+   The lever-tint-* classes set the background; nudge inner contrast. */
+.q-cell[class*="lever-tint-"] .q-shelf { border-bottom-color: rgba(0, 0, 0, 0.28); }
+.q-cell[class*="lever-tint-"] .q-bar-row.argmax {
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+/* Argmax / region flip flash. */
+@keyframes q-lever-flip {
+  0%   { box-shadow: 0 0 0 3px var(--lever-standard), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+  100% { box-shadow: 0 0 0 0 transparent, inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+}
+.q-cell.lever-flip { animation: q-lever-flip 1.0s ease-out; z-index: 3; }
+@media (prefers-reduced-motion: reduce) { .q-cell.lever-flip { animation: none; } }
+
+/* First-priced "PRICED!" ring (cell goes from all-zero to a winning lever). */
+@keyframes q-priced-ring {
+  0%   { box-shadow: 0 0 0 0 var(--lever-standard), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+  50%  { box-shadow: 0 0 0 6px var(--lever-standard), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+  100% { box-shadow: 0 0 0 0 transparent, inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+}
+.q-cell.q-just-priced { animation: q-priced-ring 1.05s ease-out; z-index: 4; }
+@media (prefers-reduced-motion: reduce) { .q-cell.q-just-priced { animation: none; } }
+
+/* Floating per-step delta + "PRICED!" toast. */
+@keyframes q-delta-rise {
+  0%   { opacity: 0; transform: translateY(2px); }
+  18%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-22px); }
+}
+.q-delta {
+  position: absolute;
+  right: 5px;
+  top: 4px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  pointer-events: none;
+  animation: q-delta-rise 1.2s ease-out forwards;
+  text-shadow: 1px 1px 0 var(--bg), -1px -1px 0 var(--bg), 1px -1px 0 var(--bg), -1px 1px 0 var(--bg);
+  z-index: 5;
+  letter-spacing: 0.02em;
+}
+.q-delta.pos   { color: var(--lever-premium); }
+.q-delta.neg   { color: var(--lever-firesale); }
+.q-delta.awake { color: var(--lever-standard); }
+@media (prefers-reduced-motion: reduce) { .q-delta { animation: none; opacity: 0; } }
+
+/* Optional max-Q heat ramp UNDER the policy tint (opt-in via mount{heat:true}).
+   A neutral brightness ladder so it never competes with the lever hue. */
+.q-cell.heat-zero { background: var(--bg-strong); }
+.q-cell.heat-1 { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.00), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+.q-cell.heat-2 { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.05), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+.q-cell.heat-3 { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.10), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+.q-cell.heat-4 { box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.15), inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18); }
+
+/* Lever-usage strip below the grid. */
+.q-freq-strip {
+  margin-top: 14px;
+  background: var(--bg-strong);
+  border: 3px solid var(--rule);
+  box-shadow: inset -2px -2px 0 0 rgba(0,0,0,0.12), 2px 2px 0 0 rgba(0,0,0,0.18);
+  padding: 8px 12px;
+  font-size: 8px;
+  color: var(--ink-on-box);
+}
+.q-freq-title { font-size: 8px; letter-spacing: 0.05em; margin-bottom: 8px; text-transform: uppercase; }
+.q-freq-row {
+  display: grid;
+  grid-template-columns: 11px 48px 1fr 24px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 7px;
+}
+.q-freq-swatch {
+  width: 10px; height: 10px;
+  border: 1px solid var(--rule);
+  box-sizing: border-box;
+}
+.q-freq-label { letter-spacing: 0.04em; }
+.q-freq-track {
+  height: 10px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--rule);
+  position: relative;
+  box-sizing: border-box;
+}
+.q-freq-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  transition: width 240ms;
+}
+.q-freq-val { text-align: right; font-variant-numeric: tabular-nums; }
+
+.q-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  /* DotGothic16 fallback so the ★ in the legend renders (Latin stays PS2P). */
+  font-family: 'Press Start 2P', 'DotGothic16', monospace;
+}
+.q-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.q-legend-swatch {
+  display: inline-block;
+  width: 18px; height: 9px;
+  border: 1px solid var(--rule);
+  box-sizing: border-box;
+}
+
+.lang-jp .qtable-host,
+.lang-jp .qtable-host button {
+  font-family: 'DotGothic16', 'Press Start 2P', monospace;
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile (<= 720px). The board is the main reading surface for the DP/SARSA
+   scenes; shrinking 4 cols + a gutter + 3 sub-rows each onto a 390px phone
+   makes the lever values illegible. Keep the desktop sizing and let the user
+   pan horizontally inside .qtable-host.
+   --------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .qtable-host {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .qtable-host .q-col-heads,
+  .qtable-host .q-grid { min-width: 560px; }
+}

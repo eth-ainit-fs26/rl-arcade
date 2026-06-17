@@ -1,0 +1,219 @@
+/* ============================================================
+   Scene 6, "Return over the van's life".
+   The six-week tape ledger, built up one row per click: rewards,
+   raw sum, gamma-power weights (+ decay sparkline), weighted
+   products, the gathered return G, then the formula card.
+   The patience-knob playground lives in scene13 / scene13.css.
+   Shared chrome (concept-heading / concept-formula-*) lives in
+   css/style.css. All colour comes from CSS tokens.
+   ============================================================ */
+
+.scene6-scene .s6-veil { visibility: hidden; }
+
+/* ---- Lede ---- */
+.scene6-scene .s6-lede {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  line-height: 1.9;
+  color: var(--ink);
+  max-width: 92ch;
+  margin: 0 0 12px;
+}
+
+/* ---- The six-week tape card ---- */
+.scene6-scene .s6-tape {
+  background: var(--bg-strong);
+  border: 4px solid var(--rule);
+  box-shadow:
+    inset 0 0 0 2px var(--bg-strong),
+    inset 0 0 0 4px var(--inner-highlight),
+    inset 0 0 0 6px var(--bg-strong);
+  padding: 12px 14px 10px;
+  margin: 0 0 14px;
+  overflow-x: auto;
+}
+.scene6-scene .s6-tape-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin-bottom: 10px;
+}
+
+.scene6-scene .s6-grid {
+  display: grid;
+  grid-template-columns: 9ch repeat(var(--nw, 6), minmax(8ch, 1fr)) 12ch;
+  gap: 5px 6px;
+  align-items: stretch;
+  font-family: 'Press Start 2P', monospace;
+  color: var(--ink-on-box);
+  min-width: 640px;
+}
+.scene6-scene .s6-row { display: contents; }
+
+.scene6-scene .s6-rowlab {
+  display: flex;
+  align-items: center;
+  font-size: 7px;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+.scene6-scene .s6-wk {
+  font-size: 7px;
+  text-align: center;
+  color: var(--ink-secondary);
+  padding: 2px 0;
+}
+.scene6-scene .s6-wk-total { color: var(--ink); }
+.scene6-scene .s6-blank { min-height: 4px; }
+
+/* the call chips */
+.scene6-scene .s6-call { display: flex; justify-content: center; align-items: center; }
+.scene6-scene .s6-chip-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid var(--rule);
+  padding: 3px 5px;
+  font-size: 7px;
+  background: var(--bg-strong);
+  color: var(--ink-on-box);
+}
+.scene6-scene .s6-chip-act.lever-run     { border-color: var(--lever-run);     background: var(--lever-run-soft); }
+.scene6-scene .s6-chip-act.lever-service { border-color: var(--lever-service); background: var(--lever-service-soft); }
+.scene6-scene .s6-chip-act.lever-replace { border-color: var(--lever-replace); background: var(--lever-replace-soft); }
+.scene6-scene .s6-chip-act .s6-act-ic { display: inline-flex; line-height: 0; }
+.scene6-scene .lever-run .s6-act-ic     { color: var(--lever-run); }
+.scene6-scene .lever-service .s6-act-ic { color: var(--lever-service); }
+.scene6-scene .lever-replace .s6-act-ic { color: var(--lever-replace); }
+
+/* reward / weighted-product number cells */
+.scene6-scene .s6-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--rule);
+  background: var(--bg);
+  padding: 5px 2px;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+.scene6-scene .s6-num.pos { color: var(--profit-green); }
+.scene6-scene .s6-num.neg { color: var(--lever-replace); }
+.scene6-scene .s6-prod { font-size: 8px; border-style: dashed; }
+
+/* the gamma-power weight row */
+.scene6-scene .s6-weight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: var(--ink-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the tiny decay sparkline (total slot of the WEIGHT row) */
+.scene6-scene .s6-sparkcell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-secondary);
+}
+.scene6-scene .s6-sparkcell svg {
+  width: 100%;
+  max-width: 90px;
+  height: 26px;
+}
+
+/* the two totals */
+.scene6-scene .s6-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 3px solid var(--rule);
+  background: var(--bg-strong);
+  padding: 4px 2px;
+}
+.scene6-scene .s6-cell-tag {
+  font-size: 6px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+}
+.scene6-scene .s6-total-val { font-size: 11px; color: var(--ink-on-box); }
+.scene6-scene .s6-total.s6-g {
+  border-color: var(--pikachu-yellow);
+  box-shadow: 2px 2px 0 var(--rule);
+}
+.scene6-scene .s6-total.s6-g .s6-total-val { font-size: 12px; }
+
+/* ---- Step animations (forward clicks only; replay is plain) ---- */
+.scene6-scene .s6-pop { animation: s6-pop 700ms ease-out 1; }
+@keyframes s6-pop {
+  0%   { box-shadow: 0 0 0 4px var(--pikachu-yellow); }
+  100% { box-shadow: 2px 2px 0 var(--rule); }
+}
+
+@keyframes s6-fadein {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.scene6-scene .s6-stagger { animation: s6-fadein 320ms ease-out both; }
+
+@keyframes s6-glowk {
+  0%   { box-shadow: 0 0 0 3px var(--pikachu-yellow); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+}
+.scene6-scene .s6-glow { animation: s6-glowk 460ms ease-out 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scene6-scene .s6-pop,
+  .scene6-scene .s6-stagger,
+  .scene6-scene .s6-glow { animation: none; }
+}
+.scene6-scene.s6-instant .s6-pop,
+.scene6-scene.s6-instant .s6-stagger,
+.scene6-scene.s6-instant .s6-glow { animation: none; }
+
+/* ---- Caption under the tape ---- */
+.scene6-scene .s6-caption {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  line-height: 1.8;
+  color: var(--ink-secondary);
+  margin: 10px 2px 0;
+  max-width: 86ch;
+  min-height: 15px;
+}
+
+/* ---- The formula card + the highlighted gamma chip ---- */
+.scene6-scene .s6-formula { margin-bottom: 14px; }
+.scene6-scene .s6-gamma-chip {
+  display: inline-block;
+  border: 2px solid var(--pikachu-yellow);
+  background: var(--bg-strong);
+  padding: 4px 10px;
+  margin-top: 6px;
+  box-shadow: 2px 2px 0 var(--rule);
+}
+.scene6-scene .s6-gamma-chip .katex { font-size: 14px; color: var(--ink-on-box); }
+
+/* ---- Step hint ---- */
+.scene6-scene .s6-hint {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-secondary);
+  margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .scene6-scene .s6-grid { min-width: 560px; }
+}
+
+/* Utility hide, last so the doubled class beats every display-setting
+   rule above regardless of source order. */
+.scene6-scene .s6-hidden.s6-hidden { display: none; }

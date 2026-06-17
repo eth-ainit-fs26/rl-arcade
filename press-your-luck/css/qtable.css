@@ -1,0 +1,135 @@
+/* PRESS YOUR LUCK board styling for the Q-grid widget mounted by qtable.js.
+ *
+ * The pokemon battle-thumbnail Q-cell styles that previously lived here were
+ * removed when the board was reskinned to the 6x3 (pot bucket x standing)
+ * display grid: no HP-bar thumbnails, no Pokedex header. The board is the
+ * only consumer of this file.
+ */
+
+/* =====================================================================
+   PRESS YOUR LUCK board: the 6x3 display Q-grid (pot bucket x standing).
+   Each cell = a mini table-card (pot meter + standing badge) + the 2 lever
+   rows (ROLL / HOLD) with their win-prob Q values, the argmax row starred.
+   ROLL cells tint burnt-orange (--c-roll), HOLD cells deep blue/teal
+   (--c-hold). The optimal-policy overlay reads as two regions with a
+   staircase seam. Tokens live in css/style.css (retinted under CRT).
+   ===================================================================== */
+.pyl-board-host {
+  font-family: 'Press Start 2P', monospace;
+  display: inline-block;
+  max-width: 100%;
+}
+.pyl-board-cols {
+  display: grid;
+  grid-template-columns: 70px repeat(var(--ns, 3), minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.pyl-board-corner {
+  font-size: 6.5px;
+  color: var(--ink-secondary);
+  align-self: end;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+.pyl-col-head {
+  font-size: 9px;
+  text-align: center;
+  padding: 4px 2px;
+  color: var(--ink);
+  border-bottom: 3px solid var(--rule);
+  letter-spacing: 0.5px;
+}
+.pyl-board-grid {
+  display: grid;
+  grid-template-columns: 70px repeat(var(--ns, 3), minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 6px;
+}
+.pyl-row-head {
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+}
+.pyl-row-head.pyl-row-danger { color: var(--chip-danger); }
+
+.pyl-cell {
+  position: relative;
+  min-height: 92px;
+  border: 3px solid var(--rule);
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px;
+  box-shadow: inset 0 0 0 2px var(--inner-highlight), 2px 2px 0 0 rgba(0,0,0,0.18);
+  overflow: hidden;
+  transition: background 0.18s steps(3), color 0.18s steps(3);
+}
+.pyl-cell-card { display: flex; justify-content: center; }
+
+/* Lever rows: star | name | Q-value. */
+.pyl-cell-levers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+}
+.pyl-lever-row {
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  gap: 4px;
+  align-items: center;
+  font-size: 7px;
+  padding: 1px 3px;
+  border: 2px solid transparent;
+}
+.pyl-lever-star { width: 9px; text-align: center; font-size: 7px; }
+.pyl-lever-name { letter-spacing: 0.5px; }
+.pyl-lever-q { font-size: 8px; text-align: right; font-variant-numeric: tabular-nums; }
+/* Tint each lever name in its own colour while the cell is still neutral. */
+.pyl-cell-unknown .pyl-lever-roll .pyl-lever-name,
+.pyl-cell-unknown .pyl-lever-roll .pyl-lever-q { color: var(--c-roll); }
+.pyl-cell-unknown .pyl-lever-hold .pyl-lever-name,
+.pyl-cell-unknown .pyl-lever-hold .pyl-lever-q { color: var(--c-hold); }
+.pyl-lever-row.pyl-lever-best {
+  border-color: var(--rule);
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: bold;
+}
+.pyl-lever-row.pyl-lever-best .pyl-lever-star { color: var(--rule); }
+
+/* Cell tints: the winning region paints the whole cell. */
+.pyl-cell-unknown { background: var(--card-bg); }
+.pyl-cell-roll { background: var(--c-roll); color: var(--c-roll-ink); }
+.pyl-cell-hold { background: var(--c-hold); color: var(--c-hold-ink); }
+/* On a tinted cell, lever text inherits the ink so it stays legible. */
+.pyl-cell-roll .pyl-lever-name, .pyl-cell-roll .pyl-lever-q, .pyl-cell-roll .pyl-lever-star,
+.pyl-cell-hold .pyl-lever-name, .pyl-cell-hold .pyl-lever-q, .pyl-cell-hold .pyl-lever-star {
+  color: inherit;
+}
+.pyl-cell-roll .pyl-lever-row.pyl-lever-best,
+.pyl-cell-hold .pyl-lever-row.pyl-lever-best {
+  border-color: currentColor;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* Argmax-flip flash: fires when a cell's winning lever changes. */
+@keyframes pyl-cell-flip {
+  0%   { box-shadow: 0 0 0 3px var(--pikachu-yellow), inset 0 0 0 2px var(--inner-highlight); }
+  100% { box-shadow: 0 0 0 0 transparent, inset 0 0 0 2px var(--inner-highlight), 2px 2px 0 0 rgba(0,0,0,0.18); }
+}
+.pyl-cell-flip { animation: pyl-cell-flip 0.85s ease-out; z-index: 3; }
+@media (prefers-reduced-motion: reduce) { .pyl-cell-flip { animation: none; } }
+
+.pyl-cell-click { cursor: pointer; }
+.pyl-cell-click:hover { outline: 3px solid var(--pikachu-yellow); outline-offset: -3px; z-index: 2; }
+
+@media (max-width: 760px) {
+  .pyl-board-host { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .pyl-board-cols, .pyl-board-grid { min-width: 520px; }
+}

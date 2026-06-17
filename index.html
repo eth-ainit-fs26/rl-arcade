@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0a18">
+<title>CLASSIC RL · arcade · SML reinforcement learning</title>
+
+<!--
+  CLASSIC RL : the arcade front door for the SML reinforcement-learning
+  visualizations, rebuilt as an authentic 1980s ARCADE ATTRACT-MODE screen.
+
+  The entire SCENE (starfield, pixel frame, color-cycling logo, high-score
+  list, marquee, sprites, prompts) is rendered on a 320x240 backbuffer
+  canvas and integer-scaled up with image-rendering:pixelated, so the pixels
+  are genuinely chunky.  The only thing NOT on the canvas is the selectable
+  game NAMES: those are a DOM overlay (#names) in Press Start 2P, positioned
+  pixel-exactly over the canvas rows so they stay crisp and high-contrast
+  (the "BALANCED" brief: true low-res scene, sharp readable names).
+
+  Content lives in cartridges.js (window.GAMES / SPRITES / PX / SPR / EXTRA /
+  VIEWS).  The engine + chrome live in js/arcade.css and js/arcade.js.
+  The plain editorial list is preserved at list.html.
+-->
+
+<link rel="stylesheet" href="css/arcade.css">
+</head>
+
+<body>
+
+<!-- the black cabinet letterboxes the integer-scaled backbuffer -->
+<div id="cabinet">
+  <!-- curved glass holds the scaled canvas + crisp name overlay + CRT glass -->
+  <div id="glass">
+    <canvas id="scene" width="320" height="240" aria-label="CLASSIC RL arcade attract screen"></canvas>
+    <!-- crisp game-name overlay (Press Start 2P), positioned over the rows -->
+    <div id="names" role="listbox" aria-label="Select a visualization"></div>
+    <!-- CRT glass: scanlines + shadow-mask + vignette + flicker -->
+    <div id="crt"></div>
+  </div>
+</div>
+
+<!-- link bar: floats over the cabinet so it works on file:// and on Pages -->
+<div id="links">
+  <button id="music-btn" type="button" title="Toggle chiptune music">♪ MUSIC</button>
+  <button id="theme-btn" type="button" title="Cycle screen colour (NES / green / amber)">THEME:NES</button>
+  <button id="jp-btn" type="button" title="日本語?">日本語?</button>
+  <a href="list.html" title="Plain editorial list">▤ PLAIN LIST</a>
+</div>
+
+<!-- touch scroll controls: shown on touch / narrow screens when the list overflows -->
+<div id="pad">
+  <button id="pad-up" type="button" aria-label="Scroll list up">▲</button>
+  <button id="pad-dn" type="button" aria-label="Scroll list down">▼</button>
+</div>
+
+<!-- boot intro (power-on flourish), drawn over the canvas -->
+<div id="boot">
+  <div class="boot-flash"></div>
+  <div class="boot-logo">★ CLASSIC RL ★</div>
+  <div class="boot-sub">SML · REINFORCEMENT LEARNING</div>
+  <div class="boot-press">PRESS ⏎ / TAP TO START</div>
+  <div class="boot-cp">© 2026 ETH ZÜRICH · SML</div>
+</div>
+
+<!-- boot-into-game loading overlay -->
+<div id="load">
+  <div class="load-t">NOW LOADING</div>
+  <div class="load-n" id="load-n">...</div>
+  <div class="load-bar"><i id="load-bar"></i></div>
+  <div class="load-c">CREDIT 00 · 1 COIN 1 PLAY</div>
+</div>
+
+<!-- konami falling-sprite easter-egg layer -->
+<div id="fx"></div>
+
+<style>
+/*, overlays that sit ABOVE the cabinet (boot / loading / fx) ----
+   These are DOM (not canvas) because they cover the whole viewport, but
+   they keep the same flat-palette / pixel-font / hard-edge look.        */
+
+#boot{
+  position:fixed; inset:0; z-index:60; background:#0a0a18;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; cursor:pointer; gap:14px;
+  font-family:'Press Start 2P', monospace;
+}
+#boot .boot-flash{
+  position:absolute; inset:0; background:#f6f8ff;
+  animation:poweron 1s steps(8) forwards;
+}
+@keyframes poweron{
+  0%{opacity:0} 8%{opacity:.95} 12%{transform:scaleY(.01);opacity:1}
+  20%{transform:scaleY(.01)} 45%{transform:scaleY(1);opacity:.25} 100%{opacity:0}
+}
+#boot .boot-logo{
+  font-size:clamp(20px,7vw,40px); color:#ffd23f; letter-spacing:.04em;
+  opacity:0; animation:bootrise .5s .8s steps(6) forwards;
+}
+#boot .boot-sub{ font-size:10px; color:#9aa0c8; letter-spacing:.18em;
+  opacity:0; animation:bootrise .5s 1.0s steps(6) forwards; }
+#boot .boot-press{ margin-top:18px; font-size:11px; color:#5ad0ff; letter-spacing:.12em;
+  opacity:0; animation:bootfade .3s 1.6s steps(2) forwards, bootblink 1s 1.9s steps(2) infinite; }
+#boot .boot-cp{ position:absolute; bottom:24px; font-size:8px; color:#4a4f80; letter-spacing:.1em; }
+@keyframes bootrise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes bootfade{to{opacity:1}}
+@keyframes bootblink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+#load{
+  position:fixed; inset:0; z-index:70; background:#0a0a18; display:none;
+  flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  font-family:'Press Start 2P', monospace;
+}
+#load.on{ display:flex; }
+#load .load-t{ font-size:13px; color:#5ad0ff; letter-spacing:.18em; }
+#load .load-n{ font-size:11px; color:#f6f8ff; letter-spacing:.06em; text-align:center; padding:0 16px; }
+#load .load-bar{ width:min(70vw,320px); height:16px; border:2px solid #5ad0ff; padding:2px; background:#0a0a18; }
+#load .load-bar i{ display:block; height:100%; width:0; background:#5ad0ff; }
+#load .load-c{ font-size:8px; color:#4a4f80; letter-spacing:.12em; }
+
+/* konami falling sprites */
+#fx{ position:fixed; inset:0; z-index:80; pointer-events:none; overflow:hidden; }
+#fx .spr{ position:absolute; top:-30px; font-size:18px; color:#5ad0ff;
+  animation:fxfall linear forwards; font-family:'Press Start 2P', monospace; }
+@keyframes fxfall{ to{ transform:translateY(112vh) rotate(360deg); opacity:.2 } }
+
+@media (prefers-reduced-motion:reduce){
+  #boot .boot-flash, #boot .boot-logo, #boot .boot-sub, #boot .boot-press{ animation:none !important; opacity:1 !important; }
+  #load .load-bar i{ width:100% !important; }
+}
+</style>
+
+<script src="cartridges.js"></script>
+<script src="js/arcade.js"></script>
+</body>
+</html>
