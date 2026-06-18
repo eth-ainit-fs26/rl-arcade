@@ -52,36 +52,59 @@
 % ===================== Faust: the Greek source, the excerpt, and the mapping (opening) =====================
 
 % --- Faust 0: the Greek line he is translating, and why he wavers ---
+% Rembrandt's etching "Faust" (the scholar in his study, gazing at the disc of
+% light) sits beside the text: it is the image historically tied to Goethe's
+% Faust, and the light prefigures the poem's "now I see the light!".
 \begin{frame}[plain]
   \vfill
-  \centering
-  {\normalsize Faust, alone in his study, is translating the opening\\ of the Gospel of John, from the Greek:}\\[14pt]
-  {\Large Ἐν ἀρχῇ ἦν ὁ λόγος}\\[4pt]
-  {\color{muted}``In the beginning was the \emph{logos}.''}\\[16pt]
-  {\normalsize One Greek word, \emph{logos}, with no single match:\\ it can mean \alert{Word}, and also \alert{Thought}, Reason, Power, the \alert{Deed}.}\\[12pt]
-  {\normalsize So he writes a rendering, strikes it out, and tries again:}
+  \begin{columns}[c]
+    \begin{column}{0.36\textwidth}
+      \centering
+      \includegraphics[height=6.2cm]{img/epigraph/rembrandt-faust}\\[3pt]
+      {\scriptsize\color{muted}Rembrandt, \emph{Faust} (etching, c.\,1652)}
+    \end{column}%
+    \begin{column}{0.60\textwidth}
+      \centering
+      \normalsize
+      Faust, alone in his study, is translating the opening of the Gospel of John, from the Greek:\\[12pt]
+      {\Large Ἐν ἀρχῇ ἦν ὁ λόγος}\\[3pt]
+      {\color{muted}``In the beginning was the \emph{logos}.''}\\[14pt]
+      One Greek word, \emph{logos}, with no single match: it can mean \alert{Word}, and also \alert{Thought}, Reason, Power, the \alert{Deed}.\\[10pt]
+      So he writes a rendering, strikes it out, and tries again:
+    \end{column}
+  \end{columns}
   \vfill
 \end{frame}
 
+% Goethe's portrait (Stieler, 1828) beside the rendering he settled on.
 \begin{frame}[plain]
   \vfill
-  \centering
-  \small
-  'Tis written: ``In the Beginning was the \alert{Word}.''\\
-  Here am I balked: who, now, can help afford?\\
-  The Word? Impossible so high to rate it;\\
-  And otherwise must I translate it,\\
-  If by the Spirit I am truly taught.\\
-  Then thus: ``In the Beginning was the \alert{Thought}.''\\
-  This first line let me weigh completely,\\
-  Lest my impatient pen proceed too fleetly.\\
-  Is it the Thought which works, creates, indeed?\\
-  ``In the Beginning was the Power,'' I read.\\
-  Yet, as I write, a warning is suggested,\\
-  That I the sense may not have fairly tested.\\
-  The Spirit aids me: now I see the light!\\
-  ``In the Beginning was the \alert{Act},'' I write.\\[10pt]
-  {\footnotesize\color{muted}Goethe, \emph{Faust\,I} (1808), trans.\ Bayard Taylor}
+  \begin{columns}[c]
+    \begin{column}{0.30\textwidth}
+      \centering
+      \includegraphics[height=5.0cm]{img/epigraph/goethe}\\[3pt]
+      {\scriptsize\color{muted}J.\,K.\ Stieler, \emph{Goethe} (1828)}
+    \end{column}%
+    \begin{column}{0.66\textwidth}
+      \centering
+      \small
+      'Tis written: ``In the Beginning was the \alert{Word}.''\\
+      Here am I balked: who, now, can help afford?\\
+      The Word? Impossible so high to rate it;\\
+      And otherwise must I translate it,\\
+      If by the Spirit I am truly taught.\\
+      Then thus: ``In the Beginning was the \alert{Thought}.''\\
+      This first line let me weigh completely,\\
+      Lest my impatient pen proceed too fleetly.\\
+      Is it the Thought which works, creates, indeed?\\
+      ``In the Beginning was the Power,'' I read.\\
+      Yet, as I write, a warning is suggested,\\
+      That I the sense may not have fairly tested.\\
+      The Spirit aids me: now I see the light!\\
+      ``In the Beginning was the \alert{Act},'' I write.\\[10pt]
+      {\footnotesize\color{muted}Goethe, \emph{Faust\,I} (1808), trans.\ Bayard Taylor}
+    \end{column}
+  \end{columns}
   \vfill
 \end{frame}
 
@@ -497,9 +520,15 @@
   \centering
   \begin{tikzpicture}
     \useasboundingbox (-0.6,-3.0) rectangle (12.6,2.8);
+    % the poet beside his own line (always shown; an etched portrait to match
+    % the Rembrandt that opened the deck)
+    \node[anchor=center] (mach) at (1.7,0.55)
+      {\includegraphics[height=4.6cm]{img/epigraph/machado-oroz}};
+    \node[below=2pt of mach, text=muted, align=center, font=\scriptsize]
+      {drawing by L.\ Oroz, 1925};
     % the couplet, held; English gloss and credit small and grey
     \only<1->{%
-      \node[font=\LARGE, align=center] (cant) at (6.0,1.7)
+      \node[font=\LARGE, align=center] (cant) at (8.0,1.55)
         {Caminante, no hay camino,\\ se hace camino al andar.};
       \node[below=5mm of cant, text=muted, align=center, font=\footnotesize]
         {(trans.) Wanderer, there is no road; the road is made by walking.\\
@@ -507,7 +536,7 @@
     % tie it to the section, in plain words (one epigraph, week-2 restraint:
     % the trajectory-coda idea lives as a quiet caption on the trajectory frame)
     \only<2->{%
-      \node[align=center, text=accent] at (6.0,-1.0)
+      \node[align=center, text=accent] at (8.0,-1.35)
         {nobody prints the odds, so there is no map;\\
          a good policy is a road that exists only once we walk it.};}%
   \end{tikzpicture}
@@ -889,7 +918,7 @@
   \end{tikzpicture}
   \takeaway{\uncover<5->{SARSA solves the Bellman equation by averaging evidence\\ instead of computing expectations}}
   \begin{center}
-    \uncover<6->{\footnotesize play it: \url{https://sml-fs26.github.io/classic_rl/repair-or-replace/}}
+    \uncover<6->{\footnotesize play it: \url{https://eth-ainit-fs26.github.io/rl-arcade/repair-or-replace/}}
   \end{center}
 \end{frame}
 

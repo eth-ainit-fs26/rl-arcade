@@ -19,6 +19,12 @@ loop through one running example: a delivery van you RUN, SERVICE, or REPLACE.
   `\roadmapdarts` / `\roadmapsarsa` light one and dim the rest.
 - `img/van/` , `img/action/` : PDF+SVG icons used by `\van` and `\act`.
 - `img/roadmap/` : PNG cartridge art plus `park.png` backdrop for `roadmap.tex`.
+- `img/epigraph/` : public-domain artwork for the Faust and Machado opening
+  frames, so they are not bare text. All sourced from Wikimedia Commons:
+  `rembrandt-faust.jpg` (Rembrandt, etching "Faust", c.\,1652, Met Museum, CC0),
+  `goethe.jpg` (J.\,K.\ Stieler, "Goethe", 1828, PD), `machado-oroz.jpg` (drawing
+  of Antonio Machado by Leandro Oroz, 1925, PD). Credits are printed under each
+  image on the slide; no attribution is legally required (PD/CC0).
 - `rl-slides.pdf` : the compiled deck (checked in).
 
 ## Build

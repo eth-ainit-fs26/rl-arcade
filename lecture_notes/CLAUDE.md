@@ -7,14 +7,19 @@ mapped one-to-one onto the arcade's THEORY GAMES scenes.
 ## Key files
 - `reinforcement_learning.tex` : the notes source. Standalone `article` (no
   external `.sty`/`.bib`); preamble pulls in `amsmath`, `mathtools`, `booktabs`,
-  `hyperref`. Sections: Motivation, Markov decision processes, Policies and
-  trajectories, accumulating reward, the Q-function and Bellman equation, SARSA,
-  then Robbins-Monro and the running average. Links back to the live viz at
-  `https://sml-fs26.github.io/classic_rl/repair-or-replace/`.
-- `reinforcement_learning.pdf` : the compiled 10-page output (the deliverable).
+  `hyperref`. Section order mirrors the slide deck one-to-one: Motivation, Markov
+  decision processes, Policies and trajectories, accumulating reward, Exploration
+  and exploitation, the Q-function and Bellman equation, Robbins-Monro, SARSA
+  (including its off-policy cousin Q-learning), then the running average as the
+  sole appendix. Links back to the live viz at
+  `https://eth-ainit-fs26.github.io/rl-arcade/repair-or-replace/`.
+- `reinforcement_learning.pdf` : the compiled 12-page output (the deliverable).
+  Rebuild after editing the `.tex` (see Build below) so the checked-in PDF tracks.
 - `sarsa-teaching-design.md` : design note proposing how to rework the SARSA
-  section (slides §6 + notes §6) so managers *derive* the update via discovery
-  activities and a Bellman->SARSA substitution morph. Not yet applied; planning only.
+  section so managers *derive* the update via discovery activities and a
+  Bellman->SARSA substitution morph. Largely applied now in both slides and notes
+  (three-bookkeepers discovery, the write-the-line build, the Bellman->SARSA
+  steps); the viz-code items it lists (e.g. an A/B toggle in `sarsa.js`) remain.
 
 ## Build
 No Makefile; compile the single source directly (twice, for `hyperref`/refs):
