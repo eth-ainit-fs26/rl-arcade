@@ -1,20 +1,36 @@
-# stale-by-sundown -- the "Stale by Sundown" bakery markdown MDP viz
+# stale-by-sundown : the "Stale by Sundown" bakery-markdown MDP cartridge
 
-A browser-only, no-build, file://-safe educational visualization of the
+A browser-only, no-build, `file://`-safe educational visualization of the
 **bakery markdown** MDP (a depreciating-asset / revenue-management problem) for a
-**manager audience**. It is one cartridge in the AI in Industry reinforcement-learning
-gallery (a sibling of `gamblers-ruin/`, `press-your-luck/`,
-`last-minute-pricing/`, `pokemon-battle/`, ...). It walks the canonical
-**13-scene arc** (title -> tutorial -> playtest -> formalization -> policy ->
-trajectory -> return -> Q* -> Bellman -> DP -> DP-caveat -> SARSA -> recap).
+**manager audience**. It is a **front-screen cartridge of the AI in Industry
+reinforcement-learning arcade** (`eth-ainit-fs26/rl-arcade`): it is registered in
+the arcade's root `cartridges.js` as `STALE BY SUNDOWN` (`href:"stale-by-sundown/"`,
+tag `BIZ`, with EN blurb and JP strings) and is launched from the 80s arcade start
+screen driven by the root `js/arcade.js`. It walks the canonical **13-scene arc**
+(title, tutorial, playtest, formalization, policy, trajectory, return, Q*, Bellman,
+DP, DP-caveat, SARSA, recap).
 
-Design source of truth:
-`../mdp-gallery/brainstorm/proposals/06-stale-by-sundown.md` (the full spec,
-exact numbers, scene-by-scene plan) and `../mdp-gallery/reference/pokemon-arc.md`
-(the 13-scene DNA). Built by mirroring the multi-file structure, click-step
-scene engine, KaTeX vendoring, chiptune music, and precompute rigor-gate of
-`gamblers-ruin/`, but skinned in the gallery's **light Press Start 2P pixel
-house theme** (NOT the editorial serif theme), matching `press-your-luck/`.
+## Design source of truth (lives in another repo, NOT copied here)
+
+The full spec (exact numbers, scene-by-scene plan) and the 13-scene template are
+design-spec files that live in the **SML classic_rl** repo, in a
+`mdp-gallery/brainstorm/` design-spec folder:
+
+- `mdp-gallery/brainstorm/proposals/06-stale-by-sundown.md` (the full spec)
+- `mdp-gallery/reference/pokemon-arc.md` (the 13-scene DNA)
+
+Those paths were **NOT copied into this arcade repo** (there is no
+`../mdp-gallery/` here). They are referenced for provenance only; if you need them,
+open the SML classic_rl repo. This cartridge was built by mirroring the multi-file
+structure, click-step scene engine, KaTeX vendoring, chiptune music, and precompute
+rigor-gate of the gallery's `gamblers-ruin` cartridge, skinned in the gallery's
+**light Press Start 2P pixel house theme** (NOT the editorial serif theme).
+
+> NOTE: the sibling cartridges named below (`gamblers-ruin/`, `press-your-luck/`,
+> `last-minute-pricing/`, `pokemon-battle/`, ...) are the gallery's other games.
+> Some of them are also present as sibling directories in THIS arcade repo, and
+> some only exist in the SML classic_rl source; treat the names as the shared
+> gallery vocabulary, not a promise that every one is checked out here.
 
 ## The MDP
 
@@ -27,12 +43,12 @@ house theme** (NOT the editorial serif theme), matching `press-your-luck/`.
   margin, slowest), **DISCOUNT** (cut price, demand jumps), **DUMP** (write off
   the batch, restock FRESH at the same unit count).
 - **Transition** P = the visible **buy-meter**. HOLD/DISCOUNT: with `pbuy(tier,
-  lever)` a customer buys -> one unit sells, the rest keep the tier (a stale
-  single -> CLEARED). With `1 - pbuy` nobody buys -> the whole batch ages one
-  tier; a STALE no-sale tips into SPOILED. DUMP is deterministic -> FRESH.
+  lever)` a customer buys, so one unit sells and the rest keep the tier (a stale
+  single goes to CLEARED). With `1 - pbuy` nobody buys, so the whole batch ages one
+  tier; a STALE no-sale tips into SPOILED. DUMP is deterministic to FRESH.
   `pbuy` rises on DISCOUNT and shrinks with age (the table is in `js/bakery.js`).
-- **Reward** r = the till change: **+5** HOLD sale, **+2** DISCOUNT sale, **−3**
-  DUMP, **−6** SPOILED, **0** CLEARED. Discount **γ = 0.75** ("by sundown").
+- **Reward** r = the till change: **+5** HOLD sale, **+2** DISCOUNT sale, **-3**
+  DUMP, **-6** SPOILED, **0** CLEARED. Discount **gamma = 0.75** ("by sundown").
 - **The twist (state-dependent optimal action):** the freshness tier is the
   croissant's evolution stage, and the best lever flips as the batch ages. The
   verified optimal playbook reads almost purely down the age axis:
@@ -47,8 +63,8 @@ house theme** (NOT the editorial serif theme), matching `press-your-luck/`.
 
   Four of five tier-rows ignore stock entirely; only **AGING** wiggles (1 unit
   HOLDs, 2-3 units DISCOUNT). **Age drives the policy.** The converged board is a
-  **green cap (HOLD), amber middle (DISCOUNT), red floor (DUMP)** -- the
-  three-way flip you can see across the room.
+  **green cap (HOLD), amber middle (DISCOUNT), red floor (DUMP)**: the three-way
+  flip you can see across the room.
 - **State-space size:** 15 non-terminal + 2 terminals. Full Q-table = `15 x 3 =
   45` numbers, drawable in its entirety; value iteration converges in 43 sweeps.
 
@@ -86,18 +102,18 @@ stale-by-sundown/
   data/datasets.js        GENERATED by precompute (window.DATA)
   precompute/build-datasets.js   the rigor gate (see below)
   vendor/katex/           KaTeX vendored (no CDN), copied from gamblers-ruin
-  assets/fonts/           PressStart2P bundled (the pixel theme uses it)
+  assets/fonts/           PressStart2P-Regular.woff2 bundled (the pixel theme uses it)
 ```
 
-No build step. Open `index.html` from `file://`; everything (engine, KaTeX,
-data, SFX, chiptune music) works offline. The only network ref is the optional
+No build step. Open `index.html` from `file://`; everything (engine, KaTeX, data,
+SFX, chiptune music) works offline. The only network ref is the optional
 DotGothic16 Google Font for Japanese, which falls back to the OS Japanese font.
 
 ### Engine conventions (shared with the gallery)
 
 - `window.Bakery` is aliased to BOTH `window.Battle` and `window.Gambler`, and
-  `window.Levers` to `window.Moves`, so the reused `bellman.js` / `sarsa.js`
-  consume them unchanged.
+  `window.Levers` is aliased to `window.Moves` (`MOVE_IDS` / `MOVE_BY_ID`), so the
+  reused `bellman.js` / `sarsa.js` consume them unchanged.
 - The Q-table is a clean `15 x 3` (`Q[stateIndex*3 + leverIdx]`, stateIndex =
   `(units-1)*5 + tierIndex`, leverIdx over `[HOLD, DISCOUNT, DUMP]`). All levers
   are legal at every state (no clamped cells, unlike the gambler).
@@ -117,30 +133,30 @@ assertion fails the file is NOT written. Verified assertions:
 2. **The optimal policy board == the proposal twist EXACTLY** (HOLD cap /
    DISCOUNT middle / DUMP floor; only AGING stock-sensitive).
 3. The three hand-checkable Q* intuitions match the proposal to 2 dp:
-   (1,STALE) HOLD −5.45 / DISCOUNT −4.00 / **DUMP −0.18**; (2,OLD) HOLD 1.73 /
+   (1,STALE) HOLD -5.45 / DISCOUNT -4.00 / **DUMP -0.18**; (2,OLD) HOLD 1.73 /
    **DISCOUNT 2.17** / DUMP 1.33; (2,FRESH) **HOLD 5.77** / DISCOUNT 4.51 / DUMP 1.33.
-4. The (1,STALE)->DUMP backup reproduces `−3 + 0.75*V(1,FRESH)`, with
+4. The (1,STALE) to DUMP backup reproduces `-3 + 0.75*V(1,FRESH)`, with
    V(1,FRESH) ~ 3.76.
 5. Every board cell has a STRICT winner (no exact Q* ties), so the rendered
-   policy + a snapshot diff do not flap.
+   policy and a snapshot diff do not flap.
 6. The age axis dominates: exactly one tier-row (AGING) is stock-sensitive.
 7. **On-policy SARSA (GLIE) reproduces the DP board on all 15 cells**, robust
    across 6 seeds; its greedy return from (3,FRESH) lands within 0.15 of V*; and
    constant-epsilon SARSA is demonstrably more cautious (the honest nuance).
-8. The return spread from (2,FRESH): HOLD mean 5.78 / sd 2.84 / min −1.23,
-   DISCOUNT mean 4.51 / sd 1.61, DUMP mean 1.32 -- the safe-vs-risky contrast
+8. The return spread from (2,FRESH): HOLD mean 5.78 / sd 2.84 / min -1.23,
+   DISCOUNT mean 4.51 / sd 1.61, DUMP mean 1.32: the safe-vs-risky contrast
    (matches the proposal's 5.79/2.82, 4.50/1.62, 1.34).
 9. A very patient gamma (0.97) shrinks the DISCOUNT band (gamma does real work).
 
-## SARSA -- the model-free path (a deliberate choice, unlike Gambler's Ruin)
+## SARSA : the model-free path (a deliberate choice, unlike Gambler's Ruin)
 
 The proposal asks for SARSA whose learned playbook converges to the DP table.
-**Here it does** (this differs from `gamblers-ruin/`, where on-policy SARSA had a
+**Here it does** (this differs from `gamblers-ruin`, where on-policy SARSA had a
 genuine timid fixed point and we had to show a SARSA-vs-Q-learning split).
 
-Empirically (verified in the precompute + during tuning): on this 15-cell MDP,
-**on-policy SARSA under a GLIE schedule** -- annealing epsilon (0.30 -> 0.02) plus
-a Robbins-Monro step size `alpha = 1/(1+visits)^0.7`, with exploring starts --
+Empirically (verified in the precompute and during tuning): on this 15-cell MDP,
+**on-policy SARSA under a GLIE schedule** (annealing epsilon 0.30 -> 0.02 plus a
+Robbins-Monro step size `alpha = 1/(1+visits)^0.7`, with exploring starts)
 converges to the DP-optimal board on **all 15 cells, robustly across 6 seeds**.
 This is the textbook GLIE result: as exploration anneals toward greedy, the
 on-policy fixed point becomes Q*.
@@ -159,7 +175,7 @@ on-policy SARSA, `qLearningUpdate` = off-policy Q-learning) for completeness.
 node precompute/build-datasets.js
 ```
 Re-run after any change to `levers.js` / `bakery.js` / `bellman.js` / `sarsa.js`.
-Payload is ~27 KB (V*, Q*, policy, per-sweep DP fill frames, GLIE + constant-eps
+Payload is ~28 KB (V*, Q*, policy, per-sweep DP fill frames, GLIE + constant-eps
 SARSA snapshots, the agreement curve, return histograms, the demo trajectory,
 the Q* tour, the patient-gamma board, recap copy, KaTeX strings).
 
@@ -167,20 +183,20 @@ the Q* tour, the patient-gamma board, recap copy, KaTeX strings).
 
 Use the watchdog recipe (`.shots_tmp/shoot.sh`: launch detached with a fresh
 `--user-data-dir`, poll for the PNG, kill the process). Shots go in `.shots_tmp/`
-(gitignored). **Mobile gotcha:** old headless Chrome with `--window-size=390,...`
-does NOT emulate a mobile layout viewport (it renders at desktop width and shows
-the left slice). To verify true 390px responsive layout, render the page inside a
-`width:390px` `<iframe>` (`.shots_tmp/_mobile.html?u=<encoded scene url>`) and
-screenshot that. Verified clean at 390px (scenes 0, 2, 9, 11, 12), desktop
-1280px (all 13), the CRT theme (0, 9), and Japanese (0, 9). The proposal's
-state-dependent twist is visibly rendered as the green-cap / amber-middle /
-red-floor board in scenes 4, 9, and 11.
+(gitignored; see `.gitignore`). **Mobile gotcha:** old headless Chrome with
+`--window-size=390,...` does NOT emulate a mobile layout viewport (it renders at
+desktop width and shows the left slice). To verify true 390px responsive layout,
+render the page inside a `width:390px` `<iframe>`
+(`.shots_tmp/_mobile.html?u=<encoded scene url>`) and screenshot that. Verified
+clean at 390px (scenes 0, 2, 9, 11, 12), desktop 1280px (all 13), the CRT theme
+(0, 9), and Japanese (0, 9). The proposal's state-dependent twist is visibly
+rendered as the green-cap / amber-middle / red-floor board in scenes 4, 9, and 11.
 
 ## House-style note
 
 Per the build requirements, this cartridge uses the gallery's **light Press
 Start 2P pixel theme** (visually indistinguishable in style from
-`press-your-luck/` / `gamblers-ruin/`), the screen-only CRT variant, full EN+JP
+`press-your-luck` / `gamblers-ruin`), the screen-only CRT variant, full EN+JP
 i18n, chiptune music with the music toggle, and the "BY CARLOS COTRINI" credit on
 the title scene. The croissant state-icon is drawn as crisp pixel-art SVG
 (`js/croissant.js`), ripening through five freshness frames, so there are no
