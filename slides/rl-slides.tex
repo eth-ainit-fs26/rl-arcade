@@ -1004,6 +1004,161 @@
   \takeaway{\uncover<4->{the road you walk, or the best road you can see}}
 \end{frame}
 
+% ===================== REINFORCE: a short policy-gradient coda (manager level) =====================
+% Value methods (SARSA, Q-learning) score the calls then pick; REINFORCE tunes the
+% playbook's odds directly. Four light frames, ~15 min, no max/argmax (house rule),
+% closing on the tie to tuning AI assistants from feedback.
+\begin{frame}{Another way: learn the playbook itself}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.6,-3.0) rectangle (12.6,2.6);
+    \only<1->{\node[align=center, text width=11.5cm] at (6.0,2.2)
+      {everything so far scored the calls, then picked the best. there is another route.};}%
+    \only<2->{%
+      \node[nodebox, acc fill, align=center, font=\footnotesize, minimum width=3.0cm] (sc) at (2.4,0.7) {scorecard\\ $Q^\star(s,a)$};
+      \node[nodebox, align=center, font=\footnotesize, minimum width=3.0cm] (pick) at (6.6,0.7) {read off the\\ best call};
+      \draw[edge] (sc.east) -- (pick.west);
+      \node[anchor=west, align=left, text=muted, font=\footnotesize] at (8.3,0.7) {the value way\\ {\scriptsize(SARSA, Q-learning)}};}%
+    \only<3->{%
+      \node[nodebox, good fill, align=center, font=\footnotesize, minimum width=3.0cm] (pol) at (2.4,-1.1) {a playbook\\ of odds};
+      \node[nodebox, align=center, font=\footnotesize, minimum width=3.0cm] (tune) at (6.6,-1.1) {tune the odds\\ toward what pays};
+      \draw[edge, good] (pol.east) -- (tune.west);
+      \node[anchor=west, align=left, text=muted, font=\footnotesize] at (8.3,-1.1) {the policy way\\ {\scriptsize(REINFORCE)}};}%
+  \end{tikzpicture}
+  \takeaway{\uncover<4->{score the calls then pick, or tune the playbook's odds directly}}
+\end{frame}
+
+\begin{frame}{A playbook that plays the odds}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.6,-2.8) rectangle (12.6,2.6);
+    \only<1->{\node[align=center, text width=11.5cm] at (6.0,2.3)
+      {no longer one fixed call per state: the playbook gives each call a probability.};}%
+    \node[nodebox, fill=accent2!18!panel, draw=accent2] (s) at (1.5,0.0) {\van{worn}\,WORN};
+    \only<2->{\draw[draw=good, fill=good!30!white] (3.6,0.75) rectangle (6.1,1.25);
+      \node[anchor=west, font=\footnotesize] at (6.3,1.0) {\act{run}\ \ $50\%$};}%
+    \only<3->{\draw[draw=accent2, fill=accent2!35!white] (3.6,0.0) rectangle (5.6,0.5);
+      \node[anchor=west, font=\footnotesize] at (6.3,0.25) {\act{service}\ \ $40\%$};}%
+    \only<4->{\draw[draw=bad, fill=bad!30!white] (3.6,-0.75) rectangle (4.1,-0.25);
+      \node[anchor=west, font=\footnotesize] at (6.3,-0.5) {\act{replace}\ \ $10\%$};}%
+    \only<5->{\node[align=center, text width=11.8cm, text=accent] at (6.0,-2.0)
+      {hidden dials $\theta$ set these odds, written $\pi_\theta(a \mid s)$: the chance of call $a$ in state $s$.};}%
+  \end{tikzpicture}
+  \takeaway{\uncover<6->{the policy is a set of odds you can tune, not a single fixed call}}
+\end{frame}
+
+\begin{frame}{REINFORCE: do more of what paid}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.6,-1.5) rectangle (12.6,3.0);
+    \only<1->{\node[nodebox, acc fill, font=\scriptsize, anchor=north, minimum width=0.7cm] (n1) at (-0.1,2.9) {1};
+      \node[anchor=west, align=left, text width=11.4cm, font=\footnotesize] at (0.5,2.7)
+        {play a whole quarter with today's odds {\color{muted}(one episode, start to finish)};};}%
+    \only<2->{\node[nodebox, acc fill, font=\scriptsize, anchor=north, minimum width=0.7cm] (n2) at (-0.1,2.0) {2};
+      \node[anchor=west, align=left, text width=11.4cm, font=\footnotesize] at (0.5,1.8)
+        {add up the return $G$ {\color{muted}(the quarter's total discounted profit)};};}%
+    \only<3->{\node[nodebox, good fill, font=\scriptsize, anchor=north, minimum width=0.7cm] (n3) at (-0.1,1.1) {3};
+      \node[anchor=west, align=left, text width=11.4cm, font=\footnotesize] at (0.5,0.9)
+        {nudge the dials: make the calls you actually made {\color{good}more} likely if $G$ was high, {\color{bad}less} likely if low;};}%
+    \only<4->{\node[nodebox, acc fill, font=\scriptsize, anchor=north, minimum width=0.7cm] (n4) at (-0.1,0.2) {4};
+      \node[anchor=west, align=left, text width=11.4cm, font=\footnotesize] at (0.5,0.0)
+        {repeat over many quarters: the odds drift toward the calls that pay.};}%
+  \end{tikzpicture}
+  \formulaslot{1.5cm}{%
+    \only<5>{\large $\theta \leftarrow \theta + \alpha \cdot G \cdot (\text{nudge toward the call you took})$}%
+    \only<6->{\large $\underbrace{\theta}_{\text{the dials}} \leftarrow \theta + \underbrace{\alpha}_{\text{step}}\, \underbrace{G}_{\text{return}} \cdot (\text{nudge toward the call you took})$}%
+  }
+  \takeaway{\uncover<7->{reinforce what worked, discourage what flopped, quarter by quarter}}
+\end{frame}
+
+% --- The faithful derivation: objective, the log-derivative (score-function) trick,
+% the Monte-Carlo estimator with reward-to-go, and baselines / the advantage. ---
+\begin{frame}{The dials, and the hill to climb}
+  \formulaslot{1.5cm}{%
+    \only<1->{\Large $J(\theta) = \E_{\tau \sim \pi_\theta}\bigl[\, R(\tau) \,\bigr]$
+      \quad {\normalsize\color{muted}the average return of the quarters $\pi_\theta$ rolls out}}%
+  }
+  \formulaslot{1.1cm}{%
+    \uncover<2->{\Large climb it: \ $\theta \leftarrow \theta + \alpha\, \nabla_\theta J(\theta)$
+      \quad {\normalsize\color{muted}step the dials in the uphill ($\nabla$) direction}}%
+  }
+  \formulaslot{1.7cm}{%
+    \only<3>{\large $\nabla_\theta J(\theta) = \nabla_\theta \sum_\tau P(\tau;\theta)\, R(\tau)$}%
+    \only<4->{\large $\nabla_\theta J(\theta) = \sum_\tau R(\tau)\, \underbrace{\nabla_\theta P(\tau;\theta)}_{\text{not yet something we can sample}}$}%
+  }
+  \takeaway{\uncover<5->{we want the uphill direction, but the returns flow through a process $\theta$ itself shapes}}
+\end{frame}
+
+\begin{frame}{The gradient trick}
+  \formulaslot{1.3cm}{%
+    \only<1->{\Large $\nabla_\theta P = P\, \nabla_\theta \log P$
+      \quad {\normalsize\color{muted}because $\nabla_\theta \log P = \nabla_\theta P / P$}}%
+  }
+  \formulaslot{1.6cm}{%
+    \only<2>{\large $\nabla_\theta J = \sum_\tau P(\tau;\theta)\, R(\tau)\, \nabla_\theta \log P(\tau;\theta)$}%
+    \only<3->{\Large $\nabla_\theta J = \E_{\tau \sim \pi_\theta}\bigl[\, R(\tau)\, \nabla_\theta \log P(\tau;\theta) \,\bigr]$
+      \ {\normalsize\color{good}an average: samplable}}%
+  }
+  \formulaslot{1.6cm}{%
+    \only<4>{\footnotesize $\log P(\tau;\theta) = \log\rho(s_0) + \sum_t \bigl[\, \log \pi_\theta(a_t\mid s_t) + \log P(s_{t+1}\mid s_t,a_t) \,\bigr]$
+      \quad {\color{muted}only the middle term holds $\theta$}}%
+    \only<5->{\Large $\nabla_\theta \log P(\tau;\theta) = \sum_t \nabla_\theta \log \pi_\theta(a_t \mid s_t)$
+      \quad {\normalsize\color{muted}dynamics drop out}}%
+  }
+  \takeaway{\uncover<6->{the environment's odds cancel, leaving only the policy's own log-probabilities: no model needed}}
+\end{frame}
+
+\begin{frame}{REINFORCE: one episode, one step uphill}
+  \formulaslot{1.5cm}{%
+    \only<1->{\Large $\nabla_\theta J = \E_{\tau}\Bigl[\, \textstyle\sum_t G_t\, \nabla_\theta \log \pi_\theta(a_t \mid s_t) \,\Bigr]$}%
+  }
+  \formulaslot{0.8cm}{%
+    \uncover<2->{{\color{muted}$G_t$ is the return from step $t$ on (reward-to-go): an action cannot change the past}}%
+  }
+  \formulaslot{1.8cm}{%
+    \only<3->{\Large $\theta \leftarrow \theta + \alpha \textstyle\sum_t \underbrace{G_t}_{\text{how good it went}}\; \underbrace{\nabla_\theta \log \pi_\theta(a_t \mid s_t)}_{\text{make } a_t \text{ likelier in } s_t}$}%
+  }
+  \formulaslot{0.7cm}{%
+    \uncover<4->{{\color{muted}roll out a quarter, then apply this once per step: the formal ``do more of what paid''}}%
+  }
+  \takeaway{\uncover<5->{one episode gives a noisy uphill step; average many and the dials climb}}
+\end{frame}
+
+\begin{frame}{Baselines: judge against expectations}
+  \formulaslot{0.8cm}{%
+    \only<1->{{\color{muted}the snag: $G_t$ swings hugely between episodes, so each step is very noisy}}%
+  }
+  \formulaslot{1.4cm}{%
+    \only<2->{\Large $\theta \leftarrow \theta + \alpha \textstyle\sum_t \bigl( G_t - b(s_t) \bigr)\, \nabla_\theta \log \pi_\theta(a_t \mid s_t)$}%
+  }
+  \formulaslot{1.6cm}{%
+    \only<3>{{\normalsize\color{muted}subtracting any action-free baseline $b(s)$ costs nothing in expectation:}}%
+    \only<4->{\large $\E_{a \sim \pi_\theta}\!\bigl[\, b(s)\, \nabla_\theta \log \pi_\theta(a\mid s) \,\bigr] = b(s)\, \nabla_\theta \underbrace{\textstyle\sum_a \pi_\theta(a\mid s)}_{=\,1} = 0$}%
+  }
+  \formulaslot{1.0cm}{%
+    \uncover<5->{\large take $b(s)=V(s)$: \ $A_t = G_t - V(s_t)$, the \emph{advantage}, how far the call beat the state's norm}%
+  }
+  \takeaway{\uncover<6->{reward a call for beating expectations, not for the raw return: same direction, far less noise}}
+\end{frame}
+
+\begin{frame}{Two families, one goal}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.6,-3.0) rectangle (12.6,2.6);
+    \only<1->{%
+      \node[nodebox, acc fill, align=center, font=\footnotesize, minimum width=4.6cm, minimum height=1.0cm] (v) at (3.2,1.4) {value-based\\ {\scriptsize SARSA, Q-learning}};
+      \node[anchor=north, align=left, text width=5.0cm, font=\scriptsize, text=muted] at (3.2,0.7)
+        {learn the calls' values, act on the best. crisp when the calls are few and countable.};}%
+    \only<2->{%
+      \node[nodebox, good fill, align=center, font=\footnotesize, minimum width=4.6cm, minimum height=1.0cm] (p) at (9.0,1.4) {policy-based\\ {\scriptsize REINFORCE}};
+      \node[anchor=north, align=left, text width=5.0cm, font=\scriptsize, text=muted] at (9.0,0.7)
+        {tune the odds directly. shines when the calls are too many to score, or a continuous dial; but learns from whole quarters, so it is noisier and needs many tries.};}%
+    \only<3->{\node[align=center, text width=11.6cm, text=accent] at (6.0,-1.9)
+      {policy gradients like REINFORCE are how today's AI assistants are tuned from human feedback {\color{muted}(RLHF)}.};}%
+  \end{tikzpicture}
+  \takeaway{\uncover<4->{two families, one goal: more reward over time}}
+\end{frame}
+
 % ===================== Closing =====================
 
 \begin{frame}{The whole story}
