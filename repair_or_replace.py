@@ -14,6 +14,7 @@ Run it with:  python3 repair_or_replace.py
 """
 
 import random
+import time
 
 
 # ---------------------------------------------------------------------------
@@ -134,6 +135,11 @@ GAMMA = 0.9
 # How often we try a random action instead of the best one (to keep exploring).
 EPSILON = 0.15
 
+# As it learns, we print the policy a few times so the class can watch it
+# settle. This is the pause (seconds) between those snapshots. Set to 0 for
+# an instant run.
+SNAPSHOT_PAUSE = 0.5
+
 # The Q-table: for every state and every action, our current guess of how
 # good that choice is. Start every guess at 0.
 # Q[state][action] is one number.
@@ -179,11 +185,33 @@ def choose_action(state):
         return best_action(state)
 
 
-def train(weeks):
-    """Run the van for many weeks, updating our guesses as we go."""
-    state = HEALTHY
+def policy_row(label):
+    """Print one line: the current best choice in each of the four conditions."""
+    cells = "".join("%-10s" % ACTION_NAMES[best_action(s)]
+                    for s in [HEALTHY, WORN, SHAKY, FAILING])
+    print("%13s   %s" % (label, cells))
 
-    for week in range(weeks):
+
+def train(weeks):
+    """
+    Run the van for many weeks, updating our guesses as we go.
+
+    Every so often we print the current best choice in each condition, so the
+    class can WATCH the policy being learned: it starts as nonsense (everything
+    looks like RUN, because every guess is still 0) and settles down to the
+    answer as the bills come in.
+    """
+    snapshots = {200, 600, 5000, 30000, weeks}
+
+    # Header + the untrained policy. Every guess starts at 0, so at first the
+    # van just defaults to RUN in every condition: it has seen no bills yet.
+    header = "".join("%-10s" % STATE_NAMES[s]
+                     for s in [HEALTHY, WORN, SHAKY, FAILING])
+    print("%13s   %s" % ("", header))
+    policy_row("start")
+
+    state = HEALTHY
+    for week in range(1, weeks + 1):
         action = choose_action(state)
         new_state, reward = step(state, action)
 
@@ -201,6 +229,11 @@ def train(weeks):
 
         # Move on to next week.
         state = new_state
+
+        # Now and then, freeze and show what the van would do today.
+        if week in snapshots:
+            policy_row("{:,} wks".format(week))
+            time.sleep(SNAPSHOT_PAUSE)
 
 
 # ---------------------------------------------------------------------------
@@ -222,9 +255,14 @@ def show_policy():
               % (name, run, service, replace, choice))
 
 
-print("Learning from 400,000 weeks of driving...")
-train(400000)
-show_policy()
+random.seed(2)        # so the live run tells the same story every time
+WEEKS = 400000
+
+print("Learning from %s weeks of driving." % "{:,}".format(WEEKS))
+print("Watch the best choice in each condition settle down as the bills add up:")
+print()
+train(WEEKS)          # prints a policy snapshot every so often as it learns
+show_policy()         # the final learned value table
 
 print()
 print("Read it top to bottom: run her while young, service her when worn,")
