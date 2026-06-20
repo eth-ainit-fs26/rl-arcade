@@ -530,6 +530,76 @@
 \section{Learning a number in the dark: Robbins-Monro}
 \roadmapdarts
 
+% --- Genie story: solving Q = 1 + 1/Q by guess-and-correct, the proto-Robbins-Monro.
+% Parrish's plate (a man in the desert, a genie of black smoke rising from the vessel)
+% carries the analogy, the role the Rembrandt/Goethe/Machado plates play at the opening.
+\begin{frame}[plain]
+  \vfill
+  \begin{columns}[c]
+    \begin{column}{0.40\textwidth}
+      \centering
+      \includegraphics[height=6.4cm]{img/epigraph/genie-parrish}\\[3pt]
+      {\scriptsize\color{muted}Maxfield Parrish, \emph{The Arabian Nights} (1909)}
+    \end{column}%
+    \begin{column}{0.56\textwidth}
+      \centering
+      \normalsize
+      Lost in the desert, you rub a lamp. The genie will set you free, on one condition: solve\\[10pt]
+      {\Large $Q = 1 + \dfrac{1}{Q}$}\\[10pt]
+      No computer, no formula, only arithmetic.\\ How do you even begin?\\[12pt]
+      {\color{accent}Guess a number, then let the equation correct your guess.}
+    \end{column}
+  \end{columns}
+  \vfill
+\end{frame}
+
+% The guess/target/loss table: each guess feeds the equation to make a target; the loss
+% (guess - target) says how far off, and becomes the next guess. Kept in fractions
+% (Fibonacci ratios) so no decimals appear until the reveal Q -> phi.
+\begin{frame}{Guess, check, correct}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.5,-2.25) rectangle (12.5,2.35);
+    \node[font=\bfseries] at (2.2,1.95) {$Q$ (guess)};
+    \node[font=\bfseries] at (5.9,1.95) {target $= 1 + \tfrac1Q$};
+    \node[font=\bfseries] at (9.6,1.95) {loss $= Q - \text{target}$};
+    \draw[draw=muted] (0.7,1.62) -- (11.5,1.62);
+    \uncover<1->{\node at (2.2,1.22){$1$};            \node at (5.9,1.22){$2$};            \node[text=accent] at (9.6,1.22){$-1$};}
+    \uncover<2->{\node at (2.2,0.63){$2$};            \node at (5.9,0.63){$\tfrac32$};     \node[text=accent2] at (9.6,0.63){$+\tfrac12$};}
+    \uncover<3->{\node at (2.2,0.04){$\tfrac32$};     \node at (5.9,0.04){$\tfrac53$};     \node[text=accent] at (9.6,0.04){$-\tfrac16$};}
+    \uncover<4->{\node at (2.2,-0.55){$\tfrac53$};    \node at (5.9,-0.55){$\tfrac85$};    \node[text=accent2] at (9.6,-0.55){$+\tfrac1{15}$};}
+    \uncover<5->{\node at (2.2,-1.14){$\tfrac85$};    \node at (5.9,-1.14){$\tfrac{13}8$}; \node[text=accent] at (9.6,-1.14){$-\tfrac1{40}$};}
+    \uncover<6->{\node at (2.2,-1.73){$\tfrac{13}8$}; \node at (5.9,-1.73){$\tfrac{21}{13}$}; \node[text=accent2] at (9.6,-1.73){$+\tfrac1{104}$};}
+    \uncover<2->{\draw[->, draw=muted, thick] (5.15,1.22) to[out=200, in=70] (2.45,0.66);
+      \node[text=muted, font=\scriptsize, anchor=south east] at (4.4,0.7) {next guess $=$ the target};}
+  \end{tikzpicture}
+  \formulaslot{1.0cm}{%
+    \uncover<7->{\large the loss shrinks toward $0$, so $Q \to 1.618\ldots = \varphi$. \ {\color{muted}guess equals target: solved.}}%
+  }
+\end{frame}
+
+% Formalize the loop into pseudocode, then point at Robbins-Monro.
+\begin{frame}{The same idea, written as an algorithm}
+  \centering
+  \begin{tikzpicture}
+    \useasboundingbox (-0.4,-1.9) rectangle (12.4,2.0);
+    \node[nodebox, fill=panel, inner sep=11pt, anchor=north] at (3.9,1.7) {%
+      \begin{minipage}{8.6cm}\small
+        \texttt{Q := 1}\hfill{\color{muted}\itshape any first guess}\\[2pt]
+        \texttt{repeat:}\\[2pt]
+        \texttt{~~target~:=~1 + 1/Q}\hfill{\color{muted}\itshape what the equation demands}\\[2pt]
+        \texttt{~~loss~~~:=~Q - target}\hfill{\color{muted}\itshape how far off, with sign}\\[2pt]
+        \texttt{~~Q~~~~~~:=~Q - loss}\hfill{\color{muted}\itshape step onto the target}\\[2pt]
+        \texttt{until loss is (almost) 0}
+      \end{minipage}};
+    \only<2->{%
+      \node[anchor=north west, align=left, text width=3.5cm, font=\footnotesize] at (8.7,1.5)
+        {a full step lands on the target. Noisy or unsure? take only a fraction:};
+      \node[accentbox, font=\ttfamily\small] at (10.45,-0.7) {Q := Q - $\alpha\cdot$loss};}
+  \end{tikzpicture}
+  \takeaway{\uncover<3->{make the target a \emph{noisy} sample and let the step $\alpha$ shrink: that is Robbins-Monro}}
+\end{frame}
+
 \begin{frame}{The Robbins-Monro iteration}
   \formulaslot{1.3cm}{%
     {\color{muted}\footnotesize to value a call we must average noisy weekly evidence, but the average is\\
